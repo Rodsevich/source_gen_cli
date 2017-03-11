@@ -1,0 +1,29 @@
+name: source_gen_cli
+description: A starting point for Dart libraries or applications.
+version: 0.0.1
+#author: Rodsevich <email@example.com>
+#homepage: https://www.example.com
+
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+  #TODO: back to normal when Pull Request approved
+
+dependencies:
+  resource: '>=2.1.2 <3.0.0'
+  args: any
+  dart_config: any
+  console: '>=2.2.4 <3.0.0'
+  mustache4dart: #'>= 1.0.0 < 2.0.0'
+    git: git://github.com/Rodsevich/mustache4dart
+    # url: https://github.com/Rodsevich/mustache4dart
+  source_gen: #any
+    git: git://github.com/Rodsevich/source_gen
+      # url: https://github.com/Rodsevich/source_gen
+
+#dependencies:
+#  lib_name: any
+
+  path: '>=1.4.1 <2.0.0'
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'
+  build_runner: ^0.1.0
