@@ -24,7 +24,7 @@ abstract class Generator {
   /// Returns true if `dependency` addition was successful and didn't existed before
   bool addDependency(Dependency dependency) {
     _addPredefinedDeps();
-    _depsProcessor.addDependency(dependency);
+    return _depsProcessor.addDependency(dependency);
   }
 
   void _addPredefinedDeps() {

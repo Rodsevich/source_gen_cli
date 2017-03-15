@@ -99,7 +99,7 @@ class DependenciesProcessor {
       return res;
     } on TimeoutException {
       if (!offline)
-        runPubGet(offline: true);
+        return runPubGet(offline: true);
       else
         throw new Exception("pub get failed");
     } finally {
