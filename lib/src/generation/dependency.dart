@@ -18,7 +18,7 @@ class Dependency {
   }
 
   String get name => _pkgDep.name;
-  String get constraint => _pkgDep.constraint;
+  String get constraint => _pkgDep.constraint.toString();
 
   bool operator ==(Dependency other) =>
       this._pkgDep.name == other._pkgDep.name &&
@@ -99,7 +99,7 @@ class DependenciesProcessor {
       return res;
     } on TimeoutException {
       if (!offline)
-        runPubGet(offline: true);
+        return runPubGet(offline: true);
       else
         throw new Exception("pub get failed");
     } finally {
