@@ -12,10 +12,13 @@ class Dependency {
   PackageDep _pkgDep;
   bool isDevDependency;
 
-  Dependency(String name, String constraint, this.isDevDependency) {
+  Dependency(String name, String constraint, {this.isDevDependency: false}) {
     VersionConstraint version = new VersionConstraint.parse(constraint);
     _pkgDep = new PackageDep(name, "hosted", version, null);
   }
+
+  String get name => _pkgDep.name;
+  String get constraint => _pkgDep.constraint;
 
   bool operator ==(Dependency other) =>
       this._pkgDep.name == other._pkgDep.name &&
@@ -45,7 +48,7 @@ class DependenciesProcessor {
   Pubspec pubspec;
   Set<Dependency> deps = new Set();
   DependencyProcessorStatus status = DependencyProcessorStatus.NOT_PROCESSED;
-  String _diff;
+  String _diff = '';
 
   bool addDependency(Dependency dep, {bool override: false}) {
     if (override) {
@@ -64,25 +67,20 @@ class DependenciesProcessor {
       .reduce((a, b) => a && b);
 
   /// Adds the specified dependencies to the pubspec.yaml file and executes `pub get`
-  /// Returns true if the pubspec.yaml file was changed
-  Future<bool> process({bool runPubGet: true}) async {
+  /// Returns the pubspec lines that were changed in the operation
+  Future<String> processPubspec() async {
     pubspec ??= await Pubspec.load();
     String oldContents = pubspec.contents;
     deps.forEach((Dependency dep) =>
         pubspec.addDependency(dep._pkgDep, dev: dep.isDevDependency));
     if (oldContents == pubspec.contents) {
       this.status = DependencyProcessorStatus.NOT_CHANGED;
-      return false;
     } else {
       _diff = getDifferentLines(oldContents, pubspec.contents);
       this.status = DependencyProcessorStatus.CHANGED;
       pubspec.save();
-      if (runPubGet) {
-        ProcessResult res = await this.runPubGet();
-        if (res.exitCode > 0) this.status = DependencyProcessorStatus.INSTALLED;
-      }
-      return true;
     }
+    return _diff;
   }
 
   // Took from Aqueduct framework
@@ -92,17 +90,20 @@ class DependenciesProcessor {
     if (offline) {
       args.add("--offline");
     }
+    ProcessResult res;
     try {
-      var result = await Process
+      res = await Process
           .run("pub", args,
               workingDirectory: getPackageRoot().path, runInShell: true)
           .timeout(new Duration(seconds: 20));
-      return result;
+      return res;
     } on TimeoutException {
       if (!offline)
         runPubGet(offline: true);
       else
         throw new Exception("pub get failed");
+    } finally {
+      if (res.exitCode > 0) this.status = DependencyProcessorStatus.INSTALLED;
     }
   }
 }

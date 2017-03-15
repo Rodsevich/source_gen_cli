@@ -8,11 +8,11 @@ String getThisPackageName() {
 }
 
 Directory getPackageRoot() {
-  Directory dir = new Directory('.');
-
+  Directory dir = Directory.current;
   try {
-    while (!dir.listSync().any((f) => f.path == "pubspec.yaml"))
-      dir = dir.parent;
+    while (
+        dir.listSync().any((f) => f.path.endsWith("pubspec.yaml")) == false &&
+            dir.path != "/") dir = dir.parent;
   } catch (e) {
     throw new Exception(
         "Error while trying to find pubspec.yaml from ${dir.path}:\n$e");
