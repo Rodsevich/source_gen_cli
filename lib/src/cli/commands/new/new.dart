@@ -1,8 +1,8 @@
 import 'dart:io';
 import "package:args/command_runner.dart" show Command;
 
-import 'package:source_gen_cli/cli/common.dart';
-import 'package:source_gen_cli/src/cli/commands/new/subcommands/GeneratorPackageCommand.dart';
+import 'package:source_gen_cli/src/common.dart';
+// import 'package:source_gen_cli/src/cli/commands/new/subcommands/';
 
 class NewCommand extends Command {
   String get name => "new";
@@ -14,7 +14,7 @@ class NewCommand extends Command {
         help: "Don't ask for confirmation on overrides",
         defaultsTo: false);
 
-    addSubcommand(new GeneratorPackageCommand());
+    // addSubcommand(new GeneratorPackageCommand());
   }
 }
 

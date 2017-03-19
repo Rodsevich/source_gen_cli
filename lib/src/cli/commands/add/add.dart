@@ -2,7 +2,7 @@ import 'dart:io';
 import "package:args/command_runner.dart" show Command;
 
 import 'package:source_gen_cli/src/common.dart';
-import 'package:source_gen_cli/src/cli/commands/add/subcommands/';
+// import 'package:source_gen_cli/src/cli/commands/add/subcommands/';
 
 class AddCommand extends Command {
   String get name => "add";
