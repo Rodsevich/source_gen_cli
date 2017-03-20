@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import './variablesResolver.dart';
+import 'package:logging/logging.dart';
+
 /// Internal class that holds the execution logic of the [Generator], it will
 /// handle the execution order of the [GenerationModule]s
 class GenerationStepsSequencer {
@@ -46,6 +49,13 @@ class GenerationStepsSequencer {
 /// `T` would be the Type of the result of executing this
 abstract class GenerationStep<T> {
   Completer _completer = new Completer();
+  VariablesResolver varsResolver;
+  Logger logger;
+
+  setUpFromSequencer(VariablesResolver varsResolver, Logger logger) {
+    this.varsResolver = varsResolver;
+    this.logger = logger;
+  }
 
   /// This operation must hold the operational logic of the subclass that, when
   /// executed, will complete the [Future] with the *eventually needed* value
@@ -56,7 +66,10 @@ abstract class GenerationStep<T> {
 
   Future<T> execute() {
     new Future(() {
-      _completer.complete(execution());
+      logger.finer("starting execution of ${this.runtimeType}");
+      var ending = execution();
+      logger.finest("ending execution of ${this.runtimeType}");
+      _completer.complete(ending);
     });
     return _completer.future;
   }

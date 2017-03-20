@@ -20,6 +20,8 @@ Directory getPackageRoot() {
   return dir;
 }
 
+String getPackageRootPath() => getPackageRoot().path + '/';
+
 String getDifferentLines(String contents1, String contents2) {
   Set<String> str1 = new Set<String>.from(contents1.split('\n')),
       str2 = new Set<String>.from(contents2.split('\n')),

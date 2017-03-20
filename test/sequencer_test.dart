@@ -1,4 +1,4 @@
-import 'package:source_gen_cli/src/generation/sequencer.dart';
+import 'package:source_gen_cli/src/generators/utils/sequencer.dart';
 import 'package:test/test.dart';
 import 'dart:async';
 

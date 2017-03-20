@@ -1,13 +1,11 @@
 import 'dart:async';
 
-/// The base class of any operation that will be performed in the workflow of
-/// the [Generator]s
-abstract class GenerationModule {
-  /// Path to find the required source, if any, from which to do the generation
-  String get source;
+import 'package:source_gen_cli/src/generators/utils/sequencer.dart';
 
-  /// The code to be executed in order to have the purpose of the module achieved.
-  ///
-  /// Return `true` if the execution was successful, `false` otherwise
-  Future<bool> run();
+/// The base class of any operation that will be performed in the workflow of
+/// the [Generator]s.
+/// `T` should be the Type of the generated thing of this module
+abstract class GenerationModule<T> extends GenerationStep<T> {
+  /// This package's relative path in which to do the generation
+  String get generationRelativePathDestination;
 }
