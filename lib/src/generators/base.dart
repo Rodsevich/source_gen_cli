@@ -12,8 +12,18 @@ import 'package:logging/logging.dart';
 abstract class Generator {
   DependenciesProcessor _depsProcessor = new DependenciesProcessor();
   bool _predefinedDependenciesAdded = false;
+  bool _generatorInitizalized = false;
   GenerationStepsSequencer _sequencer;
-  Logger logger;
+  String _initExcep = "Generator not initialized (call initializeGenerator())";
+  VariablesResolver variablesResolver = new VariablesResolver();
+  Logger logger = new Logger("generator");
+  // Logger logger;
+
+  // /// Must be called before any operation
+  // initializeGenerator([String loggerName]) {
+  //   logger = new Logger(loggerName ?? "generators.undefined");
+  //   _generatorInitizalized = true;
+  // }
 
   /// The name of this [Generator]
   String get name;
@@ -29,6 +39,7 @@ abstract class Generator {
 
   /// Returns true if `dependency` addition was successful and didn't existed before
   bool addDependency(Dependency dependency) {
+    // if (!_generatorInitizalized) throw new Exception(_initExcep);
     _addPredefinedDeps();
     bool ret = _depsProcessor.addDependency(dependency);
     //Split message to prevent warnings
@@ -40,7 +51,9 @@ abstract class Generator {
 
   /// The principal bone adder, in the very backbone of this [Generator]
   Future addGenerationStep(GenerationStep step) {
+    // if (!_generatorInitizalized) throw new Exception(_initExcep);
     logger.finest("Adding a ${step.runtimeType}");
+    step.setUpFromSequencer(this.variablesResolver, this.logger);
     return _sequencer.addStep(step);
   }
   // Future addGenerationStep(GenerationStep step) {
@@ -60,6 +73,7 @@ abstract class Generator {
   }
 
   Future<GenerationResults> execute({bool runPubGetDependencies: false}) async {
+    // if (!_generatorInitizalized) throw new Exception(_initExcep);
     // Completer completer = new Completer();
     GenerationResults ret = new GenerationResults();
     await _sequencer.execute();
