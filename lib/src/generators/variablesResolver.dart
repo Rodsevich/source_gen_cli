@@ -15,6 +15,10 @@ class VariablesResolver {
   // get(String varName) => _mem[varName] ?? null;
   // get(String varName) => _mem.containsKey(varName) ? _mem[varName] : null;
 
+  Map get getAll => new Map.unmodifiable(_mem);
+
+  /// Returns a Future that will be completed with the demanding `varName`'s
+  /// value as soon as that's available
   Future demand(String varName,
       {Type type: dynamic, String message, Function constraintsChecker}) {
     Completer completer = new Completer();

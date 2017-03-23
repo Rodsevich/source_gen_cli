@@ -1,4 +1,6 @@
+import 'dart:developer';
 import 'dart:io';
+import 'package:mustache/mustache.dart';
 
 String getThisPackageName() {
   Directory dir = getPackageRoot();
@@ -31,4 +33,38 @@ String getDifferentLines(String contents1, String contents2) {
   substract = (ret == str1) ? str2 : str1;
   ret.removeAll(substract);
   return ret.join('\n');
+}
+
+Map gatherTemplateRequiredVars(Template template) {
+  Map vars = {};
+  RegExp nameRegExp = new RegExp(r": (.*).$");
+  while (true) {
+    TemplateException error = _failing_gathering(template, vars,
+        printMessage: true, printReturn: true);
+    if (error == null)
+      return vars;
+    else {
+      String e = error.message;
+      String name = nameRegExp.firstMatch(e).group(1);
+      if (e.contains("for variable tag")) {
+        vars[name] = "#VarOf$name#";
+      } else if (e.contains("for inverse section")) {
+        vars[name] = [];
+      } else {
+        vars[name] = [];
+      }
+    }
+  }
+}
+
+TemplateException _failing_gathering(Template template, Map vars,
+    {bool printMessage = false, bool printReturn = false}) {
+  try {
+    String ret = template.renderString(vars);
+    if (printReturn) print(ret);
+    return null;
+  } on TemplateException catch (e) {
+    if (printMessage) print(e.message);
+    return e;
+  }
 }
