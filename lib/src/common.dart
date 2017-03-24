@@ -35,8 +35,7 @@ String getDifferentLines(String contents1, String contents2) {
   return ret.join('\n');
 }
 
-Map gatherTemplateRequiredVars(Template template) {
-  Map vars = {};
+Map gatherTemplateRequiredVars(Template template, [Map vars]) {
   RegExp nameRegExp = new RegExp(r": (.*).$");
   while (true) {
     TemplateException error = _failing_gathering(template, vars,
@@ -50,8 +49,8 @@ Map gatherTemplateRequiredVars(Template template) {
         vars[name] = "#VarOf$name#";
       } else if (e.contains("for inverse section")) {
         vars[name] = [];
-      } else {
-        vars[name] = [];
+      } else { //Just normal section
+        vars[name] = {};
       }
     }
   }

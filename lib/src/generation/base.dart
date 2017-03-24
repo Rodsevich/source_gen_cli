@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:source_gen_cli/src/generators/utils/sequencer.dart';
+import '../generators/utils/sequencer.dart';
 
 /// The base class of any operation that will be performed in the workflow of
 /// the [Generator]s.
