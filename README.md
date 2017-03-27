@@ -1,3 +1,4 @@
+![Generator+ logo](./logo.png "Generator +")
 # source_gen_cli
 
 Have you ever tried using or extending [source_gen](https://github.com/dart-lang/source_gen)? Did you see how tedious it was at first? Have you fought again with it in another project when you needed it again?

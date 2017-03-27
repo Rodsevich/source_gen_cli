@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:mustache/mustache.dart';
@@ -35,22 +36,51 @@ String getDifferentLines(String contents1, String contents2) {
   return ret.join('\n');
 }
 
-Map gatherTemplateRequiredVars(Template template, [Map vars]) {
+String processMustache(String source, Map vars) {
+  Template template = new Template(source);
+  return template.renderString(vars);
+}
+
+List<String> mustacheVars(String source) {
+  Template template = new Template(source);
+  Map varsMap = gatherTemplateRequiredVars(template);
+  return varsMap.keys;
+}
+
+Map gatherTemplateRequiredVars(Template template, [Map variables]) {
+  Map vars = variables ?? {};
   RegExp nameRegExp = new RegExp(r": (.*).$");
   while (true) {
-    TemplateException error = _failing_gathering(template, vars,
-        printMessage: true, printReturn: true);
+    TemplateException error = _failing_gathering(template, vars);
     if (error == null)
       return vars;
     else {
       String e = error.message;
       String name = nameRegExp.firstMatch(e).group(1);
       if (e.contains("for variable tag")) {
-        vars[name] = "#VarOf$name#";
-      } else if (e.contains("for inverse section")) {
-        vars[name] = [];
-      } else { //Just normal section
-        vars[name] = {};
+        vars[name] = "#ValueOf$name#";
+      } else {
+        //up to this version, if not a variable, only a Section is possible
+        RegExp inSectionSrc =
+            new RegExp("{{([#^])$name}}([\\s\\S]*?){{/$name}}");
+        List<Match> matches = inSectionSrc.allMatches(error.source).toList();
+        for (int i = 0; i < matches.length; i++) {
+          String type = matches[i].group(1);
+          String contents = matches[i].group(2);
+          Template sectionSourceTemplate = new Template(contents);
+          // if (e.contains("for inverse section")) {
+          // } else if (e.contains("for section")) {
+          if (type == '^') {
+            //inverse section
+            vars["^$name"] ??= {};
+            vars["^$name"]
+                .addAll(gatherTemplateRequiredVars(sectionSourceTemplate));
+          } else {
+            vars[name] ??= {};
+            vars[name]
+                .addAll(gatherTemplateRequiredVars(sectionSourceTemplate));
+          }
+        }
       }
     }
   }

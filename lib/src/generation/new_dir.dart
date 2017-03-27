@@ -20,11 +20,16 @@ class DirGenerationModule extends GenerationModule<Directory> {
 
   @override
   Directory execution() {
-    if (directory.existsSync() == false)
+    if (directory.existsSync() == false) {
+      logger.fine(directory.path + " didn't exist. Creating it.");
       directory.createSync(recursive: generateRecursively);
+    }
     return this.directory;
   }
 
   @override
   String get generationRelativePathDestination => directory.path;
+
+  @override
+  List<String> get neededVariables => mustacheVars(directory.path);
 }

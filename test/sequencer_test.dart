@@ -1,4 +1,6 @@
+import 'package:logging/logging.dart';
 import 'package:source_gen_cli/src/generators/utils/sequencer.dart';
+import 'package:source_gen_cli/src/generators/utils/variablesResolver.dart';
 import 'package:test/test.dart';
 import 'dart:async';
 
@@ -12,6 +14,10 @@ class Printer extends GenerationStep<int> {
     printerInts.add(this.index);
     return this.index;
   }
+
+  // TODO: implement logger
+  @override
+  Logger get logger => new Logger("logger");
 }
 
 List<int> printerInts = [];
