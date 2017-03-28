@@ -28,8 +28,5 @@ class DirGenerationModule extends GenerationModule<Directory> {
   }
 
   @override
-  String get generationRelativePathDestination => directory.path;
-
-  @override
   List<String> get neededVariables => mustacheVars(directory.path);
 }

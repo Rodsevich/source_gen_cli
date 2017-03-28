@@ -8,18 +8,18 @@ import 'package:path/path.dart' as path;
 /// Creates or copies (with processing if neccesary) a [File] when executed.
 class FileGenerationModule extends GenerationModule<File> {
   final String originalRelativePathDestination;
-  // Directory destinationDir;
+  Directory destinationDir;
   final String sourceString;
   final File destinationFile;
 
   /// Wether the generation shold process the mustache code or copy it "as is"
-  bool processMustache;
+  bool processInputWithMustache;
 
   FileGenerationModule(String sourceString, String relativePathDestination,
-      {this.processMustache: true})
-      // : this.destinationDir = _getDestinationDir(relativePathDestination),
+      {this.processInputWithMustache: true})
       : this.destinationFile =
             new File(path.join(getPackageRootPath(), relativePathDestination)),
+        this.destinationDir = _getDestinationDir(relativePathDestination),
         this.sourceString = sourceString,
         this.originalRelativePathDestination = relativePathDestination;
 
@@ -30,23 +30,19 @@ class FileGenerationModule extends GenerationModule<File> {
   FileGenerationModule.fromExistingFile(
       File source, String relativePathDestination)
       : this(source.readAsStringSync(), relativePathDestination,
-            processMustache: (source.path.endsWith(".mustache") &&
+            processInputWithMustache: (source.path.endsWith(".mustache") &&
                 source.path.split('.').length > 2));
 
   @override
-  File execution() {}
-
-  Template _s, _p;
-  Template get sourceTemplate => _s ??= new Template(sourceString);
-  Template get pathTemplate =>
-      _p ??= new Template(originalRelativePathDestination);
+  File execution() {
+    if (!destinationFile.existsSync()) destinationFile.create();
+    destinationFile
+        .writeAsStringSync(processMustache(sourceString, varsResolver.getAll));
+    return destinationFile;
+  }
 
   @override
-  String get generationRelativePathDestination =>
-      originalRelativePathDestination;
-  // TODO: implement neededVariables
-  @override
-  List<String> get neededVariables => null;
+  List<String> get neededVariables => mustacheVars(sourceString);
 }
 
 Directory _getDestinationDir(String relativePathDestination) {

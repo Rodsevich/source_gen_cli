@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:mustache/mustache.dart';
+import "package:path/path.dart" as path;
 
 String getThisPackageName() {
   Directory dir = getPackageRoot();
@@ -23,7 +24,7 @@ Directory getPackageRoot() {
   return dir;
 }
 
-String getPackageRootPath() => getPackageRoot().path + '/';
+String getPackageRootPath() => getPackageRoot().path + path.separator;
 
 String getDifferentLines(String contents1, String contents2) {
   Set<String> str1 = new Set<String>.from(contents1.split('\n')),

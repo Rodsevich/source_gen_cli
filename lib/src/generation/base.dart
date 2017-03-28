@@ -4,6 +4,7 @@ import '../generators/utils/sequencer.dart';
 import '../generators/utils/variablesResolver.dart';
 
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 
 /// The base class of any operation that will be performed in the workflow of
 /// the [Generator]s.
@@ -17,6 +18,13 @@ abstract class GenerationModule<T> extends GenerationStep<T> {
 
   /// This package's relative path in which to do the generation
   String get generationRelativePathDestination;
+  void set generationRelativePathDestination(String p) {
+    String norm = path.normalize(p);
+    String thisPkg = getPackageRootPath();
+    String abs = path.normalize(path.join(thisPkg, norm));
+    if (!abs.startsWith(getPackageRootPath()))
+      throw new Exception("$p goes outtside of current package ($thisPkg)");
+  }
 
   /// Declare the names of the variables required for execution
   List<String> get neededVariables;
