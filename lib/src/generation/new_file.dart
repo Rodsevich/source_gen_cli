@@ -7,21 +7,27 @@ import 'package:path/path.dart' as path;
 
 /// Creates or copies (with processing if neccesary) a [File] when executed.
 class FileGenerationModule extends GenerationModule<File> {
-  final String originalRelativePathDestination;
-  Directory destinationDir;
+  /// The contents to be written in the generated [File]
   final String sourceString;
-  final File destinationFile;
 
-  /// Wether the generation shold process the mustache code or copy it "as is"
+  /// Wether the generation should process the mustache code or copy it "as is"
   bool processInputWithMustache;
 
+  /// Determine if an already existing [File] should be silently overriden or an
+  /// [Exception] been thrown
+  bool allowOverride;
+
+  /// This will create a [File] in the provided `relativePathDestination`
+  /// (relative to this package location) by copying (or, eventually, processing)
+  /// the provided `sourceString` (being the processing determied by the
+  /// `processInputWithMustache` flag that defaults to `true`)
+  ///
+  /// If the [File] to create already exists, by default an [Exception] will be
+  /// raised, this can be omitted by setting the `allowOverride` flag to `true`
   FileGenerationModule(String sourceString, String relativePathDestination,
-      {this.processInputWithMustache: true})
-      : this.destinationFile =
-            new File(path.join(getPackageRootPath(), relativePathDestination)),
-        this.destinationDir = _getDestinationDir(relativePathDestination),
-        this.sourceString = sourceString,
-        this.originalRelativePathDestination = relativePathDestination;
+      {this.processInputWithMustache: true, this.allowOverride: false})
+      : super(relativePathDestination),
+        this.sourceString = sourceString;
 
   /// If the file to copy is named `name.extension.mustache` the generated [File]
   /// will be the result of the processing of the source one into `name.extension`
@@ -33,25 +39,56 @@ class FileGenerationModule extends GenerationModule<File> {
             processInputWithMustache: (source.path.endsWith(".mustache") &&
                 source.path.split('.').length > 2));
 
-  @override
-  File execution() {
-    if (!destinationFile.existsSync()) destinationFile.create();
-    destinationFile
-        .writeAsStringSync(processMustache(sourceString, varsResolver.getAll));
-    return destinationFile;
-  }
+  FileGenerationModule.fromExistingDir(
+      Directory dir, String generationName, String sourceString,
+      {bool processInputWithMustache: true, bool allowOverride: false})
+      : this(
+            sourceString,
+            path.relative(
+                path.join(dir.path, generationName), getPackageRootPath()),
+            allowOverride: allowOverride,
+            processInputWithMustache: processInputWithMustache);
 
   @override
   List<String> get neededVariables => mustacheVars(sourceString);
+  @override
+  FileGenerationResult execution() {
+    File destinationFile = new File(this.pathDestination);
+    bool overriden = false;
+    logger.finest(
+        "destination File instance created: <File>(${destinationFile.path})");
+    if (destinationFile.existsSync()) {
+      logger.finer("File $pathDestination exists. (Override: $allowOverride)");
+      if (allowOverride) {
+        logger.warning("$pathDestination already exists (will be overriden)");
+      } else {
+        String e = "$pathDestination already exists. Overriding isn't allowed.";
+        logger.severe(e);
+        throw new Exception(e);
+      }
+    } else {
+      logger.finer("File $pathDestination doesn't exists. Creating it...");
+      destinationFile.createSync();
+    }
+    logger.finest("Processing mustache: $processInputWithMustache");
+    String output = processInputWithMustache
+        ? processMustache(sourceString, varsResolver.getAll)
+        : sourceString;
+    logger.finer("Writing to file ($pathDestination)...");
+    destinationFile.writeAsStringSync(output);
+    logger.finest("$pathDestination written.");
+    logger.info(message);
+    return new FileGenerationResult(
+        destinationFile, overriden, processInputWithMustache);
+  }
 }
 
-Directory _getDestinationDir(String relativePathDestination) {
-  String filePath = path.join(getPackageRootPath(), relativePathDestination);
-  String dirPath = path.dirname(filePath);
-  Directory destinationDir = new Directory(dirPath);
-  destinationDir.exists().then((bool exists) {
-    if (exists == false)
-      throw new Exception("${destinationDir.path} must exists");
-  });
-  return destinationDir;
+class FileGenerationResult extends GenerationResult<File> {
+  bool overriden;
+  bool processed;
+  int lenght;
+  FileGenerationResult(File object, this.overriden, this.processed)
+      : super(object) {
+    this.lenght = this.object.lengthSync();
+  }
 }

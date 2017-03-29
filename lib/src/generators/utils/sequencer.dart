@@ -59,8 +59,9 @@ abstract class GenerationStep<T> {
 
   Future<T> execute() {
     new Future(() {
-      logger.finer("starting execution of ${this.runtimeType}");
-      var ending = execution();
+      logger.fine("starting execution of ${this.runtimeType}");
+      T ending = execution();
+      logger.info(ending);
       logger.finest("ending execution of ${this.runtimeType}");
       _completer.complete(ending);
     });

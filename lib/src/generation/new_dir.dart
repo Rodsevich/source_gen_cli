@@ -7,6 +7,10 @@ class DirGenerationModule extends GenerationModule<Directory> {
   Directory directory;
   bool generateRecursively = false;
 
+  /// Determine if an already existing [Directory] should be deleted and
+  /// generated again by this [DirGenerationModule]
+  bool allowOverride;
+
   DirGenerationModule.fromParentDir(Directory parentDirectory, String name) {
     if (name.contains('/'))
       throw new Exception(
@@ -19,14 +23,21 @@ class DirGenerationModule extends GenerationModule<Directory> {
   }
 
   @override
-  Directory execution() {
-    if (directory.existsSync() == false) {
+  DirGenerationResult execution() {
+    if (directory.existsSync()) {
+      logger.warning("${directory.path} already exists");
+    } else {
       logger.fine(directory.path + " didn't exist. Creating it.");
       directory.createSync(recursive: generateRecursively);
     }
-    return this.directory;
+    return new DirGenerationResult(directory);
   }
 
   @override
   List<String> get neededVariables => mustacheVars(directory.path);
+}
+
+class DirGenerationResult extends GenerationResult<File> {
+  bool overriden;
+  FileGenerationResult(object, this.overriden) : super(object);
 }

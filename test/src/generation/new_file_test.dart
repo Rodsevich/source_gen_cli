@@ -19,7 +19,7 @@ defineTests() {
     f2.writeAsStringSync("{{var1}}-{{var2}}");
     test('Instantiation from String', () {
       fgm = new FileGenerationModule("sourceString", "test/q.txt");
-      expect(fgm.originalRelativePathDestination, equals("test/q.txt"));
+      expect(fgm.pathDestination, endsWith("test/q.txt"));
       expect(fgm.sourceString, equals("sourceString"));
     });
     test("Instantiation from File", () {
@@ -31,13 +31,6 @@ defineTests() {
       fgm2 = new FileGenerationModule.fromExistingFile(f2, "test/t.txt");
       expect(fgm1.processInputWithMustache, isFalse);
       expect(fgm2.processInputWithMustache, isTrue);
-    });
-    test("destinationFile is setUp properly", () {
-      expect(fgm.destinationFile.path,
-          equals(Directory.current.path + "/test/w.txt"));
-      expect(fgm1.destinationFile.path, endsWith("r.txt"));
-      expect(fgm2.destinationFile.path, endsWith("test/t.txt"));
-      expect(fgm2.destinationDir.path, endsWith("test"));
     });
   });
   group("Execution:", () {
