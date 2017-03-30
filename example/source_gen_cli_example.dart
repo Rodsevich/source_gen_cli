@@ -14,6 +14,8 @@ class DependencyGenerator extends Generator {
   DependencyGenerator() {
     addDependency(new Dependency("gun", "any"));
   }
+  @override
+  bool get overridePolicy => false;
 }
 
 main() {}

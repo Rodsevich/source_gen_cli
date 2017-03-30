@@ -44,8 +44,8 @@ class FileGenerationModule extends GenerationModule<File> {
       {bool processInputWithMustache: true, bool allowOverride: false})
       : this(
             sourceString,
-            path.relative(
-                path.join(dir.path, generationName), getPackageRootPath()),
+            path.relative(path.join(dir.path, generationName),
+                from: getPackageRootPath()),
             allowOverride: allowOverride,
             processInputWithMustache: processInputWithMustache);
 
@@ -77,7 +77,6 @@ class FileGenerationModule extends GenerationModule<File> {
     logger.finer("Writing to file ($pathDestination)...");
     destinationFile.writeAsStringSync(output);
     logger.finest("$pathDestination written.");
-    logger.info(message);
     return new FileGenerationResult(
         destinationFile, overriden, processInputWithMustache);
   }

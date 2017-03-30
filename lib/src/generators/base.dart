@@ -20,17 +20,24 @@ abstract class Generator {
   Logger logger;
 
   Generator() {
-    variablesResolver = new VariablesResolver();
+    variablesResolver = new VariablesResolver(this.startingVariables);
     logger = new Logger("generator." + this.runtimeType.toString());
-    _modulesInitializer =
-        new GeneratorModulesInitializer(variablesResolver, logger);
+    _modulesInitializer = new GeneratorModulesInitializer(
+        variablesResolver, logger, this.overridePolicy);
   }
+
+  /// Here you can define starting variables for the generation
+  Map get startingVariables;
 
   /// The name of this [Generator]
   String get name;
 
   /// A description for this [Generator]
   String get description;
+
+  /// The, by default, `override` value this [Generator]'s [GeneratorModule]
+  /// will have
+  bool get overridePolicy;
 
   /// Define the dependencies this generator needs in order to work properly,
   /// they will be automatically included or updated in the local 'pubspec.yaml'

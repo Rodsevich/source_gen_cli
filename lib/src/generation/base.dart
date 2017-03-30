@@ -14,6 +14,15 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
   VariablesResolver _varsResolver;
   String _pathDestination;
   Logger _logger;
+  bool _overrideConfigured = false;
+  bool _override;
+
+  bool get override => _override;
+
+  void set override(bool override) {
+    _override = override;
+    _overrideConfigured = true;
+  }
 
   /// The [Logger] used to write the logs
   Logger get logger => _logger;
@@ -25,13 +34,17 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
   String get pathDestination => _pathDestination;
 
   /// Normalizes and absolutizes a relative to the package path and sets it
-  GenerationModule(String relativePath) {
+  GenerationModule(String relativePath, [bool override]) {
     String norm = path.normalize(relativePath);
     String thisPkg = getPackageRootPath();
     String abs = path.normalize(path.join(thisPkg, norm));
     if (!abs.startsWith(getPackageRootPath()))
-      throw new Exception("$p goes outtside of current package ($thisPkg)");
+      throw new Exception(
+          "$relativePath goes outside of current package ($thisPkg)");
     this._pathDestination = abs;
+    if (override != null) {
+      this.override = override;
+    }
   }
 
   /// Declare the names of the variables required for execution
@@ -43,15 +56,15 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
 class GeneratorModulesInitializer {
   VariablesResolver varsResolver;
   Logger logger;
+  bool overridingDefaultValue;
 
-  GeneratorModulesInitializer(VariablesResolver varsResolver, Logger logger) {
-    this.varsResolver = varsResolver;
-    this.logger = logger;
-  }
+  GeneratorModulesInitializer(
+      this.varsResolver, this.logger, this.overridingDefaultValue);
 
   void initialize(GenerationModule module) {
     module._logger = this.logger;
     module._varsResolver = this.varsResolver;
+    if (!module._overrideConfigured) module._override = overridingDefaultValue;
   }
 }
 

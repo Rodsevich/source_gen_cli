@@ -38,7 +38,7 @@ defineTests() {
       Logger logger = new Logger("test");
       VariablesResolver resolver = new VariablesResolver();
       GeneratorModulesInitializer initializer =
-          new GeneratorModulesInitializer(resolver, logger);
+          new GeneratorModulesInitializer(resolver, logger, false);
       String src = "{{#iterate}}{{var}} # {{/iterate}}{{var2}}";
       String dest = "test/ejecucion.txt";
       List<Map> listMap = [
@@ -50,7 +50,8 @@ defineTests() {
       resolver["var2"] = 4;
       FileGenerationModule fgm = new FileGenerationModule(src, dest);
       initializer.initialize(fgm);
-      File generated = await fgm.execute();
+      FileGenerationResult res = await fgm.execute();
+      File generated = res.object;
       addTearDown(() {
         generated.deleteSync();
       });
