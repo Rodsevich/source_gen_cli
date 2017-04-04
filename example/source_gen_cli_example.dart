@@ -16,6 +16,9 @@ class DependencyGenerator extends Generator {
   }
   @override
   bool get overridePolicy => false;
+  // TODO: implement startingVariables
+  @override
+  Map get startingVariables => null;
 }
 
 main() {}

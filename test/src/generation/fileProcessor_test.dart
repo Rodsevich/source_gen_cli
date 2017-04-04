@@ -24,6 +24,9 @@ class PersonGenerator extends Generator {
     addGenerationStep(
         new FileProcessor("test/persons.log", template: "+{{name}} ({{age}})"));
   }
+  // TODO: implement startingVariables
+  @override
+  Map get startingVariables => null;
 }
 
 String personLogFile = '''
