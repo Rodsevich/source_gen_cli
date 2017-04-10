@@ -30,6 +30,7 @@ dependencies:
   logging: '>=0.11.3+1 <0.12.0'
   mustache: '>=0.2.5+1 <0.3.0'
   diff: '>=0.1.1 <0.2.0'
+  analyzer: '>=0.29.10 <0.30.0'
 dev_dependencies:
   test: '>=0.12.0 <0.13.0'
   build_runner: '>=0.3.0+1 <0.4.0'
