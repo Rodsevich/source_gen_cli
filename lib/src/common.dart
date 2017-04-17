@@ -6,9 +6,11 @@ import "package:path/path.dart" as path;
 
 String getThisPackageName() {
   Directory dir = getPackageRoot();
-  File pubspec = dir.listSync().singleWhere((f) => f.path == "pubspec.yaml");
-  RegExp regExp = new RegExp(r"^name: ?(.*)$");
-  return regExp.firstMatch(pubspec.readAsStringSync()).group(0);
+  File pubspec =
+      dir.listSync().singleWhere((f) => f.path.endsWith("pubspec.yaml"));
+  RegExp regExp = new RegExp(r"^name: (.*)");
+  var ret = regExp.firstMatch(pubspec.readAsStringSync());
+  return ret?.group(1);
 }
 
 Directory getPackageRoot() {

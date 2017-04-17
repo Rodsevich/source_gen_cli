@@ -9,33 +9,6 @@ import '../lib/src/common.dart';
 import 'package:source_gen/src/annotation.dart';
 import 'dart:mirrors';
 
-abstract class GenerationAnnotation {
-  Type get annotation;
-
-  List<String> process(String path, int lineNumber, List<String> input,
-      Element elementAnnotated);
-}
-
-///METADATA!!!
-class metadata implements GenerationAnnotation {
-  final int var1;
-  final String var2;
-  final List<String> var3;
-
-  const metadata(this.var1, this.var2, {this.var3: const []});
-
-  @override
-  Type get annotation => metadata;
-
-  @override
-  List<String> process(String path, int lineNumber, List<String> input,
-      Element elementAnnotated) {
-    // TODO: implement process
-  }
-}
-
-Map<String, Type> metadatosMap;
-
 main(args) {
   metadatosMap = {"metadata": metadata, "anotacion": null};
   File f = new File(getPackageRootPath() + "tool/pruebas.dart");
@@ -71,7 +44,7 @@ main(args) {
 
   // @anotacion
 
-  @metadata(3, "sorpa", var3: ["qw", "qq"])
+  @generationAssignment("sorpi")
       //sorp
       List metadatos = [];
 }
@@ -89,24 +62,25 @@ GenerationAnnotation parseGenerationAnnotation(
           .firstWhere((Annotation a) => lines[lineNum].contains(a.name.name));
       if (annotation != null) {
         ClassMirror aMirror = reflectClass(metadatosMap[annotation.name.name]);
-        Symbol ctor = new Symbol(annotation.constructorName ?? '');
+        Symbol ctor = const Symbol(""); //annotation.constructorName ?? '');
         List pos = [];
         Map named = {};
         var q = annotation.arguments;
         var qq = q.correspondingStaticParameters;
         var qw = q.correspondingPropagatedParameters;
         var w = q.arguments;
-        for (Expression param in annotation.arguments.arguments) {
-          if (param is Literal) {
-            pos.add(param?.value ?? null);
-          } else {
-            print(param.runtimeType);
-            named[param.name] = param.expression;
-            debugger();
-          }
-        }
+        // for (Expression param in annotation.arguments.arguments) {
+        //   if (param is Literal) {
+        //     pos.add(param?.value ?? null);
+        //   } else {
+        //     named[param.name.label.token.toString()] =
+        //         param.expression.elements;
+        //     debugger();
+        //     print(param.runtimeType);
+        //   }
+        // }
         GenerationAnnotation inst =
-            aMirror.newInstance(ctor, pos, named).reflectee;
+            aMirror.newInstance(null, pos, named).reflectee;
       }
       debugger();
       return null;
