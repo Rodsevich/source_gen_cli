@@ -1,6 +1,7 @@
 library libreria.prueba;
 
-import "./pruebas.dart";
+import "../lib/src/generation/fileProcessorAnnotations/base.dart"
+    show generationAssignment;
 
 @generationAssignment("sorpi")
 var declaracion = [1, "dos", #tres];

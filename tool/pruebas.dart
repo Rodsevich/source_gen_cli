@@ -7,22 +7,25 @@ import 'package:analyzer/analyzer.dart';
 import "package:path/path.dart" as path;
 import '../lib/src/common.dart';
 import 'package:source_gen/src/annotation.dart';
+import "../lib/src/generation/fileProcessorAnnotations/base.dart" as fpa;
 import 'dart:mirrors';
 
 main(args) {
-  metadatosMap = {"metadata": metadata, "anotacion": null};
-  File f = new File(getPackageRootPath() + "tool/pruebas.dart");
-  metadata sorp = new metadata(2, "var2", var3: ["sop"]);
-  CompilationUnit parse = parseCompilationUnit(f.readAsStringSync());
+  return procesadorDeMetadatos();
+}
+
+procesadorDeMetadatos() {
+  File f = new File(getPackageRootPath() + "tool/codigo_prueba.dart");
+  // CompilationUnit parse = parseCompilationUnit(f.readAsStringSync());
+  // List<CompilationUnitMember> declaraciones = parse.declarations.toList();
   // List<Directive> directivas = parse.directives.toList();
-  List<CompilationUnitMember> declaraciones = parse.declarations.toList();
   // ClassDeclaration abstracta = declaraciones[0];
   // ClassDeclaration metada = declaraciones[1];
   // FunctionDeclaration main = declaraciones[2];
   // VariableDeclarationStatement lista = main.functionExpression.
   List<String> lines = f.readAsLinesSync();
   lines.insert(0, null); // Change 0-index to 1-indexed string
-  Set<String> anotacionesMatcher = new Set.from(metadatosMap.keys);
+  Set<String> anotacionesMatcher = new Set.from(fpa.generationAnnotations.keys);
   String matchOptions = anotacionesMatcher.join('|');
   RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*?\))?");
   for (int lineNum = 1; lineNum < lines.length; lineNum++) {
@@ -37,19 +40,13 @@ main(args) {
         args = null;
       }
       print("line $lineNum: $name" + ((args == null) ? '' : '($args)'));
-      GenerationAnnotation ga = parseGenerationAnnotation(lines, lineNum);
+      fpa.GenerationAnnotation ga = parseGenerationAnnotation(lines, lineNum);
     }
   }
   exit(0);
-
-  // @anotacion
-
-  @generationAssignment("sorpi")
-      //sorp
-      List metadatos = [];
 }
 
-GenerationAnnotation parseGenerationAnnotation(
+fpa.GenerationAnnotation parseGenerationAnnotation(
     List<String> lines, int lineNum) {
   if (lines[lineNum].trim().startsWith('/')) return null;
   int tries = 1;
@@ -61,10 +58,12 @@ GenerationAnnotation parseGenerationAnnotation(
       Annotation annotation = node.metadata
           .firstWhere((Annotation a) => lines[lineNum].contains(a.name.name));
       if (annotation != null) {
-        ClassMirror aMirror = reflectClass(metadatosMap[annotation.name.name]);
+        ClassMirror annotationMirror = reflectClass(
+            fpa.generationAnnotations[annotation.name.name].annotation);
         Symbol ctor = const Symbol(""); //annotation.constructorName ?? '');
         List pos = [];
         Map named = {};
+        //CONSEGUIR LO NECESARIO PARA INSTANCIAR LA ANOTACION
         var q = annotation.arguments;
         var qq = q.correspondingStaticParameters;
         var qw = q.correspondingPropagatedParameters;
@@ -79,8 +78,8 @@ GenerationAnnotation parseGenerationAnnotation(
         //     print(param.runtimeType);
         //   }
         // }
-        GenerationAnnotation inst =
-            aMirror.newInstance(null, pos, named).reflectee;
+        fpa.GenerationAnnotation annotationInstance =
+            annotationMirror.newInstance(ctor, pos, named);
       }
       debugger();
       return null;

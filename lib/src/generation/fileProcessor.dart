@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:diff/diff.dart';
 import 'package:source_gen_cli/src/generation/base.dart';
+import './fileProcessorAnnotations/base.dart';
 
 class FileProcessor extends GenerationModule<FileChanges> {
   String tag;

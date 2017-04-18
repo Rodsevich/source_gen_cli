@@ -1,16 +1,25 @@
 part of file.generation.annotations;
 
+/// The marked variable will be assigned with the processed value
+///   `append`: wether to supress the previously assigned value with the
+/// processed one or to append it to the end of `List` or `Map`
 class generationAssignment extends GenerationAnnotation {
-  const generationAssignment(String id) : super(id);
+  final bool append;
+  const generationAssignment(String id, {this.append: true}) : super(id);
 }
 
+/// Will process what will be assigned to a variable
 class Assignment extends FileProcessorSubmodule {
   @override
-  GenerationAnnotation get annotation => generationAssignment;
+  String get inFileTrigger => "generationAssignment";
 
   @override
-  List<String> process(String path, int lineNumber, List<String> input,
-      AnnotatedNode elementAnnotated) {
-    // TODO: implement process
+  generationAssignment get annotation =>
+      generationAssignment as generationAssignment;
+
+  @override
+  List<String> process(List<String> input, int lineNumber, String path,
+      AnnotatedNode elementAnnotated, generationAssignment annotationInstance) {
+    debugger(message: "A ver cómo escribís esta funcion...");
   }
 }

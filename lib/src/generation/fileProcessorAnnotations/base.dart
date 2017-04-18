@@ -1,13 +1,16 @@
 library file.generation.annotations;
 
+import 'dart:developer';
 import 'package:analyzer/analyzer.dart';
 
 // @generationParts("generationAnnotations")
 part "./parts.dart";
 part "./variableAssignment.dart";
 
-@generationAssignment("generationAnnotations")
-Map<String, FileProcessorSubmodule> generationAnnotations;
+@generationAssignment("generationAnnotations", append: true)
+Map<String, FileProcessorSubmodule> generationAnnotations = {
+  "generationAssignment": Assignment,
+};
 
 ///Parent class of the annotations used for in-file generation
 abstract class GenerationAnnotation {
@@ -25,5 +28,5 @@ abstract class FileProcessorSubmodule {
 
   /// Logic that will be executed in order to transform the `input`
   List<String> process(List<String> input, int lineNumber, String path,
-      AnnotatedNode elementAnnotated);
+      AnnotatedNode elementAnnotated, GenerationAnnotation annotationInstance);
 }
