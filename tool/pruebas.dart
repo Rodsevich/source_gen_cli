@@ -11,18 +11,12 @@ import "../lib/src/generation/fileProcessorAnnotations/base.dart" as fpa;
 import 'dart:mirrors';
 
 main(args) {
+  // return checkearInstantiacionAnotacion();
   return procesadorDeMetadatos();
 }
 
 procesadorDeMetadatos() {
   File f = new File(getPackageRootPath() + "tool/codigo_prueba.dart");
-  // CompilationUnit parse = parseCompilationUnit(f.readAsStringSync());
-  // List<CompilationUnitMember> declaraciones = parse.declarations.toList();
-  // List<Directive> directivas = parse.directives.toList();
-  // ClassDeclaration abstracta = declaraciones[0];
-  // ClassDeclaration metada = declaraciones[1];
-  // FunctionDeclaration main = declaraciones[2];
-  // VariableDeclarationStatement lista = main.functionExpression.
   List<String> lines = f.readAsLinesSync();
   lines.insert(0, null); // Change 0-index to 1-indexed string
   Set<String> anotacionesMatcher = new Set.from(fpa.generationAnnotations.keys);
@@ -46,6 +40,13 @@ procesadorDeMetadatos() {
   exit(0);
 }
 
+class ArgumentsResolver extends ConstantEvaluator {
+  NamedExpression visitNamedExpression(NamedExpression node) {
+    node.setProperty("resolution", node.expression.accept(this));
+    return node;
+  }
+}
+
 fpa.GenerationAnnotation parseGenerationAnnotation(
     List<String> lines, int lineNum) {
   if (lines[lineNum].trim().startsWith('/')) return null;
@@ -63,26 +64,17 @@ fpa.GenerationAnnotation parseGenerationAnnotation(
         Symbol ctor = const Symbol(""); //annotation.constructorName ?? '');
         List pos = [];
         Map named = {};
-        //CONSEGUIR LO NECESARIO PARA INSTANCIAR LA ANOTACION
-        var q = annotation.arguments;
-        var qq = q.correspondingStaticParameters;
-        var qw = q.correspondingPropagatedParameters;
-        var w = q.arguments;
-        // for (Expression param in annotation.arguments.arguments) {
-        //   if (param is Literal) {
-        //     pos.add(param?.value ?? null);
-        //   } else {
-        //     named[param.name.label.token.toString()] =
-        //         param.expression.elements;
-        //     debugger();
-        //     print(param.runtimeType);
-        //   }
-        // }
-        fpa.GenerationAnnotation annotationInstance =
-            annotationMirror.newInstance(ctor, pos, named);
+        ArgumentsResolver resolver = new ArgumentsResolver();
+        for (AstNode arg in annotation.arguments.arguments) {
+          var val = arg.accept(resolver);
+          if (val is NamedExpression)
+            named[new Symbol(val.name.label.token.value())] =
+                val.getProperty("resolution");
+          else
+            pos.add(val);
+        }
+        return annotationMirror.newInstance(ctor, pos, named).reflectee;
       }
-      debugger();
-      return null;
     } on AnalyzerErrorGroup catch (e) {
       if (tries < 10)
         tries++;
@@ -93,6 +85,25 @@ fpa.GenerationAnnotation parseGenerationAnnotation(
     }
   }
 }
+
+// class Clazz {
+//   int number;
+//   Clazz(this.number);
+// }
+//
+// checkClassInstantiation() {
+//   var reflec = reflectClass(Clazz);
+//   Clazz instance = reflec.newInstance(new Symbol(''), [1]).reflectee;
+//   assert(instance.number == 1);
+// }
+
+// checkearInstantiacionAnotacion() {
+//   Type clase = fpa.GenerationAssignment;
+//   var reflejador = reflectClass(clase);
+//   fpa.GenerationAssignment instancia =
+//       reflejador.newInstance(new Symbol(''), []).reflectee;
+//   assert(instancia.generatorIdentifier == "sorp");
+// }
 
 // // for var i in ... works
 // List<String> s = ["sorp", "longa", "ponga"];

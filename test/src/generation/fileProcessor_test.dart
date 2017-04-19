@@ -21,8 +21,8 @@ class PersonGenerator extends Generator {
   bool get overridePolicy => true;
 
   PersonGenerator() {
-    addGenerationStep(
-        new FileProcessor("test/persons.log", template: "+{{name}} ({{age}})"));
+    addGenerationStep(new FileProcessor("test/persons.log",
+        templates: {"persons-adder": "+{{name}} ({{age}})"}));
   }
   // TODO: implement startingVariables
   @override
@@ -32,7 +32,7 @@ class PersonGenerator extends Generator {
 String personLogFile = '''
 This is persons.log file. Logged persons:
 +Jane (29)
-@AddBefore
+@generationBefore("persons-adder")
 ''';
 
 defineTests() {

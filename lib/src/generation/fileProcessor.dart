@@ -5,33 +5,17 @@ import './fileProcessorAnnotations/base.dart';
 
 class FileProcessor extends GenerationModule<FileChanges> {
   String tag;
-  String template;
-  FileProcessor(String relativePath, {this.template}) : super(relativePath);
+  Map<String, String> templates;
+  FileProcessor(String relativePath, {this.templates}) : super(relativePath);
 
   @override
   FileProcessResult execution() {
     // TODO: implement execution
   }
 
-  FileProcessor.fromSorpi() : super('') {
-    //@generationAfter("sorp")
-  }
-
   // TODO: implement neededVariables
   @override
   List<String> get neededVariables => null;
-}
-
-class generationBefore {
-  final String id;
-
-  const generationBefore(this.id);
-}
-
-class generationAfter {
-  final String id;
-
-  const generationAfter(this.id);
 }
 
 /// A line by line changes tracking object
