@@ -1,21 +1,140 @@
 import 'dart:io';
+import 'package:analyzer/analyzer.dart';
+import 'package:logging/logging.dart';
 import 'package:diff/diff.dart';
-import 'package:source_gen_cli/src/generation/base.dart';
+import '../common.dart';
+import '../analysis.dart';
+import '../generation/base.dart';
 import './fileProcessorAnnotations/base.dart';
+import '../generators/utils/variablesResolver.dart';
 
 class FileProcessor extends GenerationModule<FileChanges> {
   String tag;
   Map<String, String> templates;
-  FileProcessor(String relativePath, {this.templates}) : super(relativePath);
+  final List<FileProcessorAnnotationSubmodule> submodules;
+  File file;
+  List<String> _input;
+  List<_FileProcessingStep> _steps;
+
+  FileProcessor(String relativePath,
+      {this.templates: null, List<FileProcessorAnnotationSubmodule> submodules})
+      : super(relativePath),
+        this.submodules = submodules ?? fileProcessorAnnotationSubmodules {
+    file = new File(getPackageRootPath() + relativePath);
+    _input = file.readAsLinesSync();
+    _input.insert(0, null); // Change 0-index to 1-indexed string
+    Set<String> anotacionesMatcher =
+        new Set.from(submodules.map((s) => s.inFileTrigger));
+    String matchOptions = anotacionesMatcher.join('|');
+    RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*?\))?");
+    for (int lineNum = 1; lineNum < _input.length; lineNum++) {
+      String line = _input[lineNum];
+      Match match = annotationsMatcher.firstMatch(line);
+      if (match != null) {
+        String name = match.group(1);
+        var annotationInstance;
+        AnnotatedNode annotatedNode;
+        FileProcessorAnnotationSubmodule submodule =
+            submodules.firstWhere((s) => s.inFileTrigger == name);
+        if (line.trim().startsWith('/')) {
+          //An annotation in a comment
+          String args;
+          try {
+            args = match.group(2);
+          } catch (e) {
+            args = null;
+          }
+          annotationInstance = instantiate(
+              submodule.annotation,
+              "", //TODO: support also named constructors
+              new ArgumentsResolution.fromSourceConstants(args));
+        } else {
+          _ParsedGenerationAnnotation p =
+              _parseGenerationAnnotationWithNode(_input, lineNum, name);
+          annotationInstance = p.instance;
+          annotatedNode = p.node;
+        }
+        _steps.add(new _FileProcessingStep(submodule, annotatedNode,
+            annotationInstance, lineNum, templates[name]));
+      }
+    }
+  }
+
+  _ParsedGenerationAnnotation _parseGenerationAnnotationWithNode(
+      List<String> lines, int lineNum, String annotationName) {
+    int tries = 1;
+    while (true) {
+      String s = lines.sublist(lineNum, lineNum + tries).join('\n');
+      try {
+        CompilationUnit c = parseCompilationUnit(s);
+        AnnotatedNode node = c.declarations.first;
+        Annotation annotation = node.metadata
+            .firstWhere((Annotation a) => lines[lineNum].contains(a.name.name));
+        if (annotation != null) {
+          Type type = fileProcessorAnnotationSubmodules
+              .singleWhere((FileProcessorAnnotationSubmodule s) =>
+                  s.inFileTrigger == annotation.name.name)
+              .annotation;
+          var instance = instanceFromAnnotation(type, annotation);
+          return new _ParsedGenerationAnnotation(instance, node);
+        }
+      } on AnalyzerErrorGroup catch (e) {
+        if (tries < 10)
+          tries++;
+        else {
+          rethrow;
+        }
+      }
+    }
+  }
 
   @override
   FileProcessResult execution() {
-    // TODO: implement execution
+    logger.finest("Starting ${file.path} processing in ${_steps.length} steps");
+    List<String> process = _input.sublist(0, _input.length);
+    for (_FileProcessingStep step in _steps) {
+      logger.finest(
+          "Processing 'line ${step.annotationLine}: ${_input[step.annotationLine]}'");
+      process = step.process(file.path, process, logger, varsResolver);
+    }
+    logger.finer("${file.path} processed. Generating differences...");
+    String processed = process.join('\n');
+    FileChanges changes = new FileChanges(_input.join('\n'), processed);
+    logger.finer("Differences created. Now rewriting ${file.path}...");
+    file.writeAsStringSync(processed, mode: FileMode.WRITE_ONLY);
+    logger.finer("${file.path} rewritted successfully");
+    return new FileProcessResult(changes);
   }
 
-  // TODO: implement neededVariables
   @override
-  List<String> get neededVariables => null;
+  List<String> get neededVariables => _steps
+      .map((s) => s.neededVars())
+      .reduce((List<String> e, List<String> s) => e.addAll(s));
+}
+
+/// Used to return the processing results
+class _ParsedGenerationAnnotation {
+  GenerationAnnotation instance;
+  AnnotatedNode node;
+  _ParsedGenerationAnnotation(this.instance, this.node);
+}
+
+/// Internal class used by [FileProcessor] for execution when needed
+class _FileProcessingStep {
+  FileProcessorAnnotationSubmodule submodule;
+  AnnotatedNode node;
+  dynamic annotation;
+  int annotationLine;
+  String template;
+  _FileProcessingStep(this.submodule, this.node, this.annotation,
+      this.annotationLine, this.template);
+
+  List<String> neededVars() => mustacheVars(this.template);
+
+  List<String> process(String path, List<String> input, Logger logger,
+          VariablesResolver vars) =>
+      submodule.process(logger, vars, input, annotationLine, path, template,
+          node, annotation);
 }
 
 /// A line by line changes tracking object

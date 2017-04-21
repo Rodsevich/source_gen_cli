@@ -1,90 +1,48 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'package:analyzer/dart/element/element.dart';
-import 'package:logging/logging.dart';
 import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/ast/token.dart';
+import 'package:logging/logging.dart';
 import "package:path/path.dart" as path;
 import '../lib/src/common.dart';
 import 'package:source_gen/src/annotation.dart';
-import "../lib/src/generation/fileProcessorAnnotations/base.dart" as fpa;
-import 'dart:mirrors';
+import "../lib/src/generation/fileProcessorAnnotations/base.dart";
 
 main(args) {
+  return asignarConTokens();
+  // return pruebaMaps();
   // return checkearInstantiacionAnotacion();
-  return procesadorDeMetadatos();
+  // return procesadorDeArgs();
 }
 
-procesadorDeMetadatos() {
-  File f = new File(getPackageRootPath() + "tool/codigo_prueba.dart");
-  List<String> lines = f.readAsLinesSync();
-  lines.insert(0, null); // Change 0-index to 1-indexed string
-  Set<String> anotacionesMatcher = new Set.from(fpa.generationAnnotations.keys);
-  String matchOptions = anotacionesMatcher.join('|');
-  RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*?\))?");
-  for (int lineNum = 1; lineNum < lines.length; lineNum++) {
-    String line = lines[lineNum];
-    Match match = annotationsMatcher.firstMatch(line);
-    if (match != null) {
-      String args, name = match.group(1);
-      try {
-        args = match.group(2);
-        args = args.substring(1, args.length - 1);
-      } catch (e) {
-        args = null;
-      }
-      print("line $lineNum: $name" + ((args == null) ? '' : '($args)'));
-      fpa.GenerationAnnotation ga = parseGenerationAnnotation(lines, lineNum);
-    }
-  }
-  exit(0);
+asignarConTokens() {
+  String asignarEsto = "SORPI; PEDAZO DE PUTO!";
+  File f = new File("./codigo_prueba.dart");
+  CompilationUnit c = parseCompilationUnit(f.readAsStringSync());
+  CompilationUnit c = parseCompilationUnit(funcSrc);
+  var t = c.declarations.single as TopLevelVariableDeclaration;
+  VariableDeclaration de = t.childEntities.first.variables.first;
+  Token tok = de.beginToken;
+  while (tok.type != TokenType.SEMICOLON) tok = tok.next;
 }
 
-class ArgumentsResolver extends ConstantEvaluator {
-  NamedExpression visitNamedExpression(NamedExpression node) {
-    node.setProperty("resolution", node.expression.accept(this));
-    return node;
-  }
-}
+// pruebaMaps() {
+//   Map sorp = {};
+//   print(null);
+//   print(sorp["nulo"]);
+// }
 
-fpa.GenerationAnnotation parseGenerationAnnotation(
-    List<String> lines, int lineNum) {
-  if (lines[lineNum].trim().startsWith('/')) return null;
-  int tries = 1;
-  while (true) {
-    String s = lines.sublist(lineNum, lineNum + tries).join('\n');
-    try {
-      CompilationUnit c = parseCompilationUnit(s);
-      AnnotatedNode node = c.declarations.first ?? null;
-      Annotation annotation = node.metadata
-          .firstWhere((Annotation a) => lines[lineNum].contains(a.name.name));
-      if (annotation != null) {
-        ClassMirror annotationMirror = reflectClass(
-            fpa.generationAnnotations[annotation.name.name].annotation);
-        Symbol ctor = const Symbol(""); //annotation.constructorName ?? '');
-        List pos = [];
-        Map named = {};
-        ArgumentsResolver resolver = new ArgumentsResolver();
-        for (AstNode arg in annotation.arguments.arguments) {
-          var val = arg.accept(resolver);
-          if (val is NamedExpression)
-            named[new Symbol(val.name.label.token.value())] =
-                val.getProperty("resolution");
-          else
-            pos.add(val);
-        }
-        return annotationMirror.newInstance(ctor, pos, named).reflectee;
-      }
-    } on AnalyzerErrorGroup catch (e) {
-      if (tries < 10)
-        tries++;
-      else {
-        print(s);
-        rethrow;
-      }
-    }
-  }
-}
+// procesadorDeArgs() {
+//   String source = "(1,'dos',#tres)";
+//   String funcSrc = "var q = a$source;";
+//   CompilationUnit c = parseCompilationUnit(funcSrc);
+//   var t = c.declarations.single as TopLevelVariableDeclaration;
+//   VariableDeclaration de = t.childEntities.first.variables.first;
+//   Expression expression = de.initializer;
+//   ArgumentList args = (expression as MethodInvocation).argumentList;
+//   exit(0);
+// }
 
 // class Clazz {
 //   int number;
@@ -98,9 +56,9 @@ fpa.GenerationAnnotation parseGenerationAnnotation(
 // }
 
 // checkearInstantiacionAnotacion() {
-//   Type clase = fpa.GenerationAssignment;
+//   Type clase = GenerationAssignment;
 //   var reflejador = reflectClass(clase);
-//   fpa.GenerationAssignment instancia =
+//   GenerationAssignment instancia =
 //       reflejador.newInstance(new Symbol(''), []).reflectee;
 //   assert(instancia.generatorIdentifier == "sorp");
 // }
