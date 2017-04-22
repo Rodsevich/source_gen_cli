@@ -5,4 +5,8 @@ import "../lib/src/generation/fileProcessorAnnotations/base.dart"
 
 @generationAssignment("sorpi", append: false)
 @generationAssignment("longa", append: true)
-List declaracion = [1, "dos", #tres];
+List<String> declaracion = [
+  "laaaaaaaa];aaaaaaaaaaaaaaaaaaarrrrrrrrrrrrgggggggggggooooooooo1",
+  "laaaaaaaaaaaaaaaaaaaaaaaaaaarrrrrrrrrrrrgggggggggggooooooooo2",
+  "laaaaaaaaaaaaaaaaaaaaaaaaaaarrrrrrrrrrrrgggggggggggooooooooo3"
+];

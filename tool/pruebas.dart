@@ -16,29 +16,59 @@ main(args) {
   // return procesadorDeArgs();
 }
 
+void err(String s, int n) {
+  print(s);
+}
+
 asignarConTokens() {
   String asignarEsto = '"SORPI; PEDAZO DE PUTO!"';
+  String location = "<LOCATION>";
+  int lineNumber = 6;
+  var logger = new Logger("l");
   File f = new File("tool/codigo_prueba.dart");
   CompilationUnit c = parseCompilationUnit(f.readAsStringSync());
-  var t = c.declarations.single as TopLevelVariableDeclaration;
-  VariableDeclaration de = t.variables.variables.first;
-  Token token = de.beginToken.previous;
-  String variableStr, assignmentStr, aux = '';
-  while (token.type != TokenType.SEMICOLON) {
-    if (token.type == TokenType.EQ) {
-      variableStr = aux;
-      aux = '';
-      token = token.next;
+  List<String> input = f.readAsLinesSync();
+  input.insert(0, null);
+  var annotatedNode = c.declarations.single; // as TopLevelVariableDeclaration;
+  TypeName type;
+  VariableDeclaration variableDeclaration;
+  if (annotatedNode is TopLevelVariableDeclaration) {
+    type = annotatedNode.variables.type;
+    try {
+      variableDeclaration = annotatedNode.variables.variables.single;
+    } catch (e) {
+      err("@generationAssignment must be used in a single variable declaration",
+          logger);
     }
-    aux += token.toString();
-    token = token.next;
+  } else
+    err("@generationAssignment must only annotate variables ($location)",
+        logger);
+  SimpleIdentifier name = variableDeclaration.name;
+  Token equalSign = variableDeclaration.equals;
+  Expression expression = variableDeclaration.initializer;
+  String variableStr = "$type $name $equalSign", assignmentStr = "$expression";
+  logger.finest("processing the line numbers of the assignment...");
+  int varLN = lineNumber + 1;
+  while (!input[varLN].trimLeft().startsWith(variableStr)) varLN++;
+  int assigLN = varLN;
+  if (equalSign != null) {
+    int offset = type?.beginToken.offset ?? name.beginToken.offset;
+    int currentCount = offset + input[varLN].length;
+    int llegar = expression.endToken.next.offset;
+    try {
+      while (currentCount < expression.endToken.next.offset)
+        currentCount += input[++assigLN].length;
+    } on RangeError catch (e) {
+      if ((e.invalidValue - 1) != e.end)
+        throw new Exception("Impossible error happened. don't know what to do");
+      if (input[e.end].contains(
+          new RegExp("${expression.endToken} ?${expression.endToken.next}")))
+        assigLN = e.end;
+      else
+        throw new Exception("Couldn't find end of expression line Number");
+    }
   }
-  if (variableStr == null)
-    variableStr = aux;
-  else
-    assignmentStr = aux;
-  print("$variableStr = $assignmentStr;");
-  print(de.toSource());
+  logger.finest("processing the assignment...");
 }
 
 // pruebaMaps() {

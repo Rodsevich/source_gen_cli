@@ -28,25 +28,25 @@ class Assignment extends FileProcessorAnnotationSubmodule {
     String template = annotationInstance.template ?? generationTemplate;
     if (template == "" || template == null)
       err("There is no template provided for $location", logger);
-    if (annotatedNode is! VariableDeclaration)
+    logger.finest("Analizing the node annotated by $location...");
+    TypeName type;
+    VariableDeclaration variableDeclaration;
+    if (annotatedNode is TopLevelVariableDeclaration) {
+      type = annotatedNode.variables.type;
+      try {
+        variableDeclaration = annotatedNode.variables.variables.single;
+      } on IterableElementError catch (e) {
+        err("@generationAssignment must be used in a single variable declaration",
+            logger);
+      }
+    } else
       err("@generationAssignment must only annotate variables ($location)",
           logger);
-    logger.finest("Analizing the node annotated by $location...");
-    String variableStr, assignmentStr, aux = '';
-    Token token = annotatedNode.beginToken;
-    while (token.type != TokenType.SEMICOLON) {
-      if (token.type == TokenType.EQ) {
-        variableStr = aux;
-        aux = '';
-        token = token.next;
-      }
-      aux += token.toString();
-      token = token.next;
-    }
-    if (variableStr == null)
-      variableStr = aux;
-    else
-      assignmentStr = aux;
+    SimpleIdentifier name = variableDeclaration.name;
+    Token equalSign = variableDeclaration.equals;
+    Expression expression = variableDeclaration.initializer;
+    String variableStr = "$type $name $equalSign",
+        assignmentStr = "$expression";
     logger.finest("processing the line numbers of the assignment...");
     int varLN = lineNumber + 1;
     while (!input[varLN].trimLeft().startsWith(variableStr)) varLN++;
@@ -54,7 +54,6 @@ class Assignment extends FileProcessorAnnotationSubmodule {
     while (!input[assigLN].contains(assignmentStr)) assigLN++;
     logger.finest("processing the assignment...");
     String assignment = processMustache(template, vars.getAll);
-    
   }
 
   void err(String msg, Logger logger) {
