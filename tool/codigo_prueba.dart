@@ -5,4 +5,4 @@ import "../lib/src/generation/fileProcessorAnnotations/base.dart"
 
 @generationAssignment("sorpi", append: false)
 @generationAssignment("longa", append: true)
-var declaracion = [1, "dos", #tres];
+List declaracion = [1, "dos", #tres];

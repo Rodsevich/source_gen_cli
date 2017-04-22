@@ -32,7 +32,7 @@ class Assignment extends FileProcessorAnnotationSubmodule {
       err("@generationAssignment must only annotate variables ($location)",
           logger);
     logger.finest("Analizing the node annotated by $location...");
-    String variableStr, assignmentStr, aux;
+    String variableStr, assignmentStr, aux = '';
     Token token = annotatedNode.beginToken;
     while (token.type != TokenType.SEMICOLON) {
       if (token.type == TokenType.EQ) {
@@ -47,13 +47,14 @@ class Assignment extends FileProcessorAnnotationSubmodule {
       variableStr = aux;
     else
       assignmentStr = aux;
-    logger.finest("processing the line number of the assignment...");
-    int assigLN = lineNumber + 1;
-    while (!input[assigLN].trimLeft().startsWith(variableStr)) assigLN++;
+    logger.finest("processing the line numbers of the assignment...");
+    int varLN = lineNumber + 1;
+    while (!input[varLN].trimLeft().startsWith(variableStr)) varLN++;
+    int assigLN = varLN;
+    while (!input[assigLN].contains(assignmentStr)) assigLN++;
     logger.finest("processing the assignment...");
     String assignment = processMustache(template, vars.getAll);
-    //TODO: asignar a lo ultimo de la lista/map/lo q sea teniendo en cuenta
-    //a las lineas multiples
+    
   }
 
   void err(String msg, Logger logger) {

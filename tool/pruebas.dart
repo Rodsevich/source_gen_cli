@@ -17,14 +17,28 @@ main(args) {
 }
 
 asignarConTokens() {
-  String asignarEsto = "SORPI; PEDAZO DE PUTO!";
-  File f = new File("./codigo_prueba.dart");
+  String asignarEsto = '"SORPI; PEDAZO DE PUTO!"';
+  File f = new File("tool/codigo_prueba.dart");
   CompilationUnit c = parseCompilationUnit(f.readAsStringSync());
-  CompilationUnit c = parseCompilationUnit(funcSrc);
   var t = c.declarations.single as TopLevelVariableDeclaration;
-  VariableDeclaration de = t.childEntities.first.variables.first;
-  Token tok = de.beginToken;
-  while (tok.type != TokenType.SEMICOLON) tok = tok.next;
+  VariableDeclaration de = t.variables.variables.first;
+  Token token = de.beginToken.previous;
+  String variableStr, assignmentStr, aux = '';
+  while (token.type != TokenType.SEMICOLON) {
+    if (token.type == TokenType.EQ) {
+      variableStr = aux;
+      aux = '';
+      token = token.next;
+    }
+    aux += token.toString();
+    token = token.next;
+  }
+  if (variableStr == null)
+    variableStr = aux;
+  else
+    assignmentStr = aux;
+  print("$variableStr = $assignmentStr;");
+  print(de.toSource());
 }
 
 // pruebaMaps() {
