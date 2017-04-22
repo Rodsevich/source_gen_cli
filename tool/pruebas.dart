@@ -54,7 +54,6 @@ asignarConTokens() {
   if (equalSign != null) {
     int offset = type?.beginToken.offset ?? name.beginToken.offset;
     int currentCount = offset + input[varLN].length;
-    int llegar = expression.endToken.next.offset;
     try {
       while (currentCount < expression.endToken.next.offset)
         currentCount += input[++assigLN].length;
