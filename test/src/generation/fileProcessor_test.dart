@@ -24,26 +24,34 @@ class PersonGenerator extends Generator {
     addGenerationStep(new FileProcessor("test/persons.log",
         templates: {"persons-adder": "+{{name}} ({{age}})"}));
   }
-  // TODO: implement startingVariables
+
   @override
-  Map get startingVariables => null;
+  Map get startingVariables => {"name": "John", "age": "20"};
 }
 
-String personLogFile = '''
+String personLogFileContents = '''
 This is persons.log file. Logged persons:
 +Jane (29)
 @generationBefore("persons-adder")
+@generationAfter("persons-remover", template: "-{{name}} ({{age}})")
+-Jane (29)
 ''';
 
 defineTests() {
-  File personsLog = new File(getPackageRootPath() + "test/persons.log");
-  setUpAll(() {});
-  tearDownAll(() {});
-  Map vars = {"name": "John", "age": "20"};
-  VariablesResolver res = new VariablesResolver();
-  group('fileProcessor', () {
+  File personsLogFile = new File(getPackageRootPath() + "test/persons.log");
+  group('generator', () {
+    setUpAll(() {
+      personsLogFile.createSync();
+      personsLogFile.writeAsStringSync(personLogFileContents);
+    });
+    tearDownAll(() {
+      personsLogFile.deleteSync();
+    });
     test('todo', () {
-      // TODO: Implement test.
+      PersonGenerator generator = new PersonGenerator();
+      generator.execute();
+      expect(personsLogFile.readAsStringSync(), contains("+John (20)"));
+      expect(personsLogFile.readAsStringSync(), contains("-John (20)"));
     });
   });
 }

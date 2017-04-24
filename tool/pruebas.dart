@@ -30,44 +30,8 @@ asignarConTokens() {
   List<String> input = f.readAsLinesSync();
   input.insert(0, null);
   var annotatedNode = c.declarations.single; // as TopLevelVariableDeclaration;
-  TypeName type;
-  VariableDeclaration variableDeclaration;
-  if (annotatedNode is TopLevelVariableDeclaration) {
-    type = annotatedNode.variables.type;
-    try {
-      variableDeclaration = annotatedNode.variables.variables.single;
-    } catch (e) {
-      err("@generationAssignment must be used in a single variable declaration",
-          logger);
-    }
-  } else
-    err("@generationAssignment must only annotate variables ($location)",
-        logger);
-  SimpleIdentifier name = variableDeclaration.name;
-  Token equalSign = variableDeclaration.equals;
-  Expression expression = variableDeclaration.initializer;
-  String variableStr = "$type $name $equalSign", assignmentStr = "$expression";
-  logger.finest("processing the line numbers of the assignment...");
-  int varLN = lineNumber + 1;
-  while (!input[varLN].trimLeft().startsWith(variableStr)) varLN++;
-  int assigLN = varLN;
-  if (equalSign != null) {
-    int offset = type?.beginToken.offset ?? name.beginToken.offset;
-    int currentCount = offset + input[varLN].length;
-    try {
-      while (currentCount < expression.endToken.next.offset)
-        currentCount += input[++assigLN].length;
-    } on RangeError catch (e) {
-      if ((e.invalidValue - 1) != e.end)
-        throw new Exception("Impossible error happened. don't know what to do");
-      if (input[e.end].contains(
-          new RegExp("${expression.endToken} ?${expression.endToken.next}")))
-        assigLN = e.end;
-      else
-        throw new Exception("Couldn't find end of expression line Number");
-    }
-  }
-  logger.finest("processing the assignment...");
+
+  print(input.join('\n'));
 }
 
 // pruebaMaps() {

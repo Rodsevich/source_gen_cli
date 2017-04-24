@@ -11,20 +11,23 @@ import '../generators/utils/variablesResolver.dart';
 class FileProcessor extends GenerationModule<FileChanges> {
   String tag;
   Map<String, String> templates;
-  final List<FileProcessorAnnotationSubmodule> submodules;
+  List<FileProcessorAnnotationSubmodule> submodules;
   File file;
   List<String> _input;
   List<_FileProcessingStep> _steps;
 
   FileProcessor(String relativePath,
-      {this.templates: null, List<FileProcessorAnnotationSubmodule> submodules})
-      : super(relativePath),
-        this.submodules = submodules ?? fileProcessorAnnotationSubmodules {
+      {this.templates: null,
+      List<FileProcessorAnnotationSubmodule> submodules: const []})
+      : super(relativePath) {
+    this.submodules = new List.from(submodules, growable: true);
+    if (this.submodules.isEmpty)
+      this.submodules.addAll(fileProcessorAnnotationSubmodules);
     file = new File(getPackageRootPath() + relativePath);
     _input = file.readAsLinesSync();
     _input.insert(0, null); // Change 0-index to 1-indexed string
     Set<String> anotacionesMatcher =
-        new Set.from(submodules.map((s) => s.inFileTrigger));
+        new Set.from(this.submodules.map((s) => s.inFileTrigger));
     String matchOptions = anotacionesMatcher.join('|');
     RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*?\))?");
     for (int lineNum = 1; lineNum < _input.length; lineNum++) {
@@ -35,7 +38,7 @@ class FileProcessor extends GenerationModule<FileChanges> {
         var annotationInstance;
         AnnotatedNode annotatedNode;
         FileProcessorAnnotationSubmodule submodule =
-            submodules.firstWhere((s) => s.inFileTrigger == name);
+            this.submodules.firstWhere((s) => s.inFileTrigger == name);
         if (line.trim().startsWith('/')) {
           //An annotation in a comment
           String args;
@@ -71,7 +74,8 @@ class FileProcessor extends GenerationModule<FileChanges> {
         Annotation annotation = node.metadata
             .firstWhere((Annotation a) => lines[lineNum].contains(a.name.name));
         if (annotation != null) {
-          Type type = fileProcessorAnnotationSubmodules
+          Type type = this
+              .submodules
               .singleWhere((FileProcessorAnnotationSubmodule s) =>
                   s.inFileTrigger == annotation.name.name)
               .annotation;
@@ -84,7 +88,7 @@ class FileProcessor extends GenerationModule<FileChanges> {
         else {
           rethrow;
         }
-      }
+      } on RangeError catch (e) {}
     }
   }
 
