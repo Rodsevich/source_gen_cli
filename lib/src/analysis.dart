@@ -21,6 +21,7 @@ class ArgumentsResolution {
     VariableDeclaration de = t.childEntities.first.variables.first;
     Expression expression = de.initializer;
     ArgumentList args = (expression as MethodInvocation).argumentList;
+    _processArgs(args);
   }
   _processArgs(ArgumentList list) {
     _ArgumentsResolver resolver = new _ArgumentsResolver();

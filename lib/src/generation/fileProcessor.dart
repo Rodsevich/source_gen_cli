@@ -11,25 +11,24 @@ import '../generators/utils/variablesResolver.dart';
 class FileProcessor extends GenerationModule<FileChanges> {
   String tag;
   Map<String, String> templates;
-  List<FileProcessorAnnotationSubmodule> submodules;
+  List<FileProcessorSubmodule> submodules;
   File file;
   List<String> _input;
-  List<_FileProcessingStep> _steps;
+  List<_FileProcessingStep> _steps = [];
 
   FileProcessor(String relativePath,
-      {this.templates: null,
-      List<FileProcessorAnnotationSubmodule> submodules: const []})
+      {this.templates: null, List<FileProcessorSubmodule> submodules: const []})
       : super(relativePath) {
     this.submodules = new List.from(submodules, growable: true);
     if (this.submodules.isEmpty)
-      this.submodules.addAll(fileProcessorAnnotationSubmodules);
+      this.submodules.addAll(fileProcessorSubmodules);
     file = new File(getPackageRootPath() + relativePath);
     _input = file.readAsLinesSync();
     _input.insert(0, null); // Change 0-index to 1-indexed string
     Set<String> anotacionesMatcher =
         new Set.from(this.submodules.map((s) => s.inFileTrigger));
     String matchOptions = anotacionesMatcher.join('|');
-    RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*?\))?");
+    RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*\))?");
     for (int lineNum = 1; lineNum < _input.length; lineNum++) {
       String line = _input[lineNum];
       Match match = annotationsMatcher.firstMatch(line);
@@ -37,9 +36,10 @@ class FileProcessor extends GenerationModule<FileChanges> {
         String name = match.group(1);
         var annotationInstance;
         AnnotatedNode annotatedNode;
-        FileProcessorAnnotationSubmodule submodule =
+        FileProcessorSubmodule submodule =
             this.submodules.firstWhere((s) => s.inFileTrigger == name);
-        if (line.trim().startsWith('/')) {
+        if (line.trim().startsWith('/') ||
+            submodule is FileProcessorMarkerSubmodule) {
           //An annotation in a comment
           String args;
           try {
@@ -76,7 +76,7 @@ class FileProcessor extends GenerationModule<FileChanges> {
         if (annotation != null) {
           Type type = this
               .submodules
-              .singleWhere((FileProcessorAnnotationSubmodule s) =>
+              .singleWhere((FileProcessorSubmodule s) =>
                   s.inFileTrigger == annotation.name.name)
               .annotation;
           var instance = instanceFromAnnotation(type, annotation);
@@ -125,7 +125,7 @@ class _ParsedGenerationAnnotation {
 
 /// Internal class used by [FileProcessor] for execution when needed
 class _FileProcessingStep {
-  FileProcessorAnnotationSubmodule submodule;
+  FileProcessorSubmodule submodule;
   AnnotatedNode node;
   dynamic annotation;
   int annotationLine;
@@ -137,8 +137,11 @@ class _FileProcessingStep {
 
   List<String> process(String path, List<String> input, Logger logger,
           VariablesResolver vars) =>
-      submodule.process(logger, vars, input, annotationLine, path, template,
-          node, annotation);
+      (submodule is FileProcessorAnnotationSubmodule)
+          ? submodule.process(logger, vars, input, annotationLine, path,
+              template, node, annotation)
+          : submodule.process(
+              logger, vars, input, annotationLine, path, template, annotation);
 }
 
 /// A line by line changes tracking object

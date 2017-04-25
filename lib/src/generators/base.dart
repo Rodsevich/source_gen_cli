@@ -15,7 +15,7 @@ abstract class Generator {
   GeneratorModulesInitializer _modulesInitializer;
   bool _predefinedDependenciesAdded = false;
   bool _generatorInitizalized = false;
-  GenerationStepsSequencer _sequencer;
+  GenerationStepsSequencer _sequencer = new GenerationStepsSequencer();
   VariablesResolver variablesResolver;
   Logger logger;
 

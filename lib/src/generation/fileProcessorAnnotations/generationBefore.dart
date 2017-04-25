@@ -2,10 +2,10 @@ part of file.generation.annotations;
 
 class generationBefore extends GenerationAnnotation {
   const generationBefore(String id, {String template: null})
-      : super(id, template, false);
+      : super(id, template);
 }
 
-class GenerationBefore extends FileProcessorAnnotationSubmodule {
+class GenerationBefore extends FileProcessorMarkerSubmodule {
   GenerationBefore() : super("generationBefore", generationBefore);
 
   @override
@@ -16,7 +16,6 @@ class GenerationBefore extends FileProcessorAnnotationSubmodule {
       int lineNumber,
       String path,
       String generationTemplate,
-      AnnotatedNode annotatedNode,
       generationBefore annotationInstance) {
     logger.finest("processing template...");
     String generation = processMustache(generationTemplate, vars.getAll);

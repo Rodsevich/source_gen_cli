@@ -7,7 +7,7 @@ class generationAssignment extends GenerationAnnotation {
   final bool append;
   const generationAssignment(String id,
       {this.append: true, String template: null})
-      : super(id, template, true);
+      : super(id, template);
 }
 
 /// Will process what will be assigned to a variable

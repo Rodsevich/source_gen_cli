@@ -14,7 +14,7 @@ part "./generationBefore.dart";
 part "./generationAfter.dart";
 
 @generationAssignment("generationAnnotations", append: true)
-List<FileProcessorAnnotationSubmodule> fileProcessorAnnotationSubmodules = [
+List<FileProcessorAnnotationSubmodule> fileProcessorSubmodules = [
   new Assignment(),
   new GenerationBefore(),
   new GenerationAfter(),
@@ -45,6 +45,9 @@ abstract class FileProcessorSubmodule {
 
 /// Process an annotation, something that annotates an [AnnotatedNode]
 abstract class FileProcessorAnnotationSubmodule extends FileProcessorSubmodule {
+  FileProcessorAnnotationSubmodule(String inFileTrigger, Type annotation)
+      : super(inFileTrigger, annotation);
+
   /// Logic that will be executed in order to transform the `input`
   List<String> process(
       Logger logger,
@@ -61,6 +64,9 @@ abstract class FileProcessorAnnotationSubmodule extends FileProcessorSubmodule {
 /// anything, but is rather used to mark the position in the file from which
 /// to generate.
 abstract class FileProcessorMarkerSubmodule extends FileProcessorSubmodule {
+  FileProcessorMarkerSubmodule(String inFileTrigger, Type annotation)
+      : super(inFileTrigger, annotation);
+
   /// Logic that will be executed in order to transform the `input`
   List<String> process(
       Logger logger,
