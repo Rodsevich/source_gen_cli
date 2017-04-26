@@ -57,8 +57,13 @@ class FileProcessor extends GenerationModule<FileChanges> {
           annotationInstance = p.instance;
           annotatedNode = p.node;
         }
-        _steps.add(new _FileProcessingStep(submodule, annotatedNode,
-            annotationInstance, lineNum, templates[name]));
+        _steps.add(new _FileProcessingStep(
+            submodule,
+            annotatedNode,
+            annotationInstance,
+            lineNum,
+            annotationInstance.template ??
+                templates[annotationInstance.generatorIdentifier]));
       }
     }
   }
@@ -96,14 +101,18 @@ class FileProcessor extends GenerationModule<FileChanges> {
   FileProcessResult execution() {
     logger.finest("Starting ${file.path} processing in ${_steps.length} steps");
     List<String> process = _input.sublist(0, _input.length);
+    int generatedLines;
     for (_FileProcessingStep step in _steps) {
       logger.finest(
           "Processing 'line ${step.annotationLine}: ${_input[step.annotationLine]}'");
+      generatedLines = process.length - _input.length;
+      step.annotationLine += generatedLines;
       process = step.process(file.path, process, logger, varsResolver);
     }
     logger.finer("${file.path} processed. Generating differences...");
-    String processed = process.join('\n');
-    FileChanges changes = new FileChanges(_input.join('\n'), processed);
+    String processed = process.sublist(1, process.length).join('\n');
+    FileChanges changes =
+        new FileChanges(_input.sublist(1, _input.length).join('\n'), processed);
     logger.finer("Differences created. Now rewriting ${file.path}...");
     file.writeAsStringSync(processed, mode: FileMode.WRITE_ONLY);
     logger.finer("${file.path} rewritted successfully");

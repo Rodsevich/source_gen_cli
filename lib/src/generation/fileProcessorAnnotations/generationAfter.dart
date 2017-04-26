@@ -18,9 +18,13 @@ class GenerationAfter extends FileProcessorMarkerSubmodule {
       String generationTemplate,
       generationAfter annotationInstance) {
     logger.finest("processing template...");
-    String generation = processMustache(generationTemplate, vars.getAll);
+    String generation = processMustache(
+        generationTemplate, vars[annotationInstance.generatorIdentifier]);
     logger.finest("Writing changes...");
-    input.insert(lineNumber + 1, generation);
+    int added = 0;
+    for (String adding in generation.split('\n')) {
+      input.insert(added++ + lineNumber + 1, adding);
+    }
     return input;
   }
 }

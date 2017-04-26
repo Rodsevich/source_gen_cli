@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:source_gen_cli/generator.dart';
 import 'package:source_gen_cli/src/generation/fileProcessor.dart';
+import 'package:source_gen_cli/src/generators/base.dart';
 import 'package:source_gen_cli/src/generators/utils/variablesResolver.dart';
 import 'package:source_gen_cli/src/common.dart';
 import 'package:test/test.dart';
@@ -22,18 +23,22 @@ class PersonGenerator extends Generator {
 
   PersonGenerator() {
     addGenerationStep(new FileProcessor("test/persons.log",
-        templates: {"persons-adder": "+{{name}} ({{age}})"}));
+        templates: {"person-adder": "+{{name}} ({{age}})"}));
   }
 
   @override
-  Map get startingVariables => {"name": "John", "age": "20"};
+  Map get startingVariables => {
+        "person-adder": {"name": "John", "age": "20"},
+        "person-remover": {"name": "John", "age": "20"}
+      };
 }
 
 String personLogFileContents = '''
-This is persons.log file. Logged persons:
+@generationAfter("no-id", template: "Uno\\ndos.")
+@generationBefore("no-id", template: "..\\nCatorce!")
 +Jane (29)
-@generationBefore("persons-adder")
-@generationAfter("persons-remover", template: "-{{name}} ({{age}})")
+@generationBefore("person-adder")
+@generationAfter("person-remover", template: "-{{name}} ({{age}})")
 -Jane (29)
 ''';
 
@@ -45,11 +50,11 @@ defineTests() {
       personsLogFile.writeAsStringSync(personLogFileContents);
     });
     tearDownAll(() {
-      personsLogFile.deleteSync();
+      // personsLogFile.deleteSync();
     });
-    test('todo', () {
+    test('generates once', () async {
       PersonGenerator generator = new PersonGenerator();
-      generator.execute();
+      GenerationResults results = await generator.execute();
       expect(personsLogFile.readAsStringSync(), contains("+John (20)"));
       expect(personsLogFile.readAsStringSync(), contains("-John (20)"));
     });
