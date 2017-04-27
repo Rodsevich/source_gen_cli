@@ -13,17 +13,18 @@ class PersonGenerator extends Generator {
   List<Dependency> get alwaysNeededDependencies => null;
 
   @override
-  String get description => "desc";
+  String get description => "Persons-Generation";
 
   @override
-  String get name => "test";
+  String get name => "PeopleGeneration";
 
   @override
   bool get overridePolicy => true;
 
   PersonGenerator() {
     addGenerationStep(new FileProcessor("test/persons.log",
-        templates: {"person-adder": "+{{name}} ({{age}})"}));
+        templates: {"person-adder": "+{{name}} ({{age}})"},
+        generationIds: [new RegExp("person-.*")]));
   }
 
   @override
@@ -31,6 +32,58 @@ class PersonGenerator extends Generator {
         "person-adder": {"name": "John", "age": "20"},
         "person-remover": {"name": "John", "age": "20"}
       };
+}
+
+class SecondPersonGenerator extends Generator {
+  @override
+  List<Dependency> get alwaysNeededDependencies => null;
+
+  @override
+  String get description =>
+      "generates all but no-id annotations (just the persons, then)";
+
+  @override
+  String get name => "Second Person-Generation";
+
+  @override
+  bool get overridePolicy => true;
+
+  SecondPersonGenerator() {
+    addGenerationStep(new FileProcessor("test/persons.log",
+        templates: {"person-adder": "+{{name}} ({{age}})"},
+        generationIdsExcluded: ["no-id"]));
+  }
+
+  Map jack = {"name": "Jack", "age": "21"};
+
+  @override
+  Map get startingVariables =>
+      {"person-adder": jack, "person-remover": this.jack};
+}
+
+class AllGenerator extends Generator {
+  @override
+  List<Dependency> get alwaysNeededDependencies => null;
+
+  @override
+  String get description => "Generates all the tested annotations";
+
+  @override
+  String get name => "AllGenerator";
+
+  @override
+  bool get overridePolicy => true;
+
+  AllGenerator() {
+    addGenerationStep(new FileProcessor("test/persons.log",
+        templates: {"person-adder": "+{{name}} ({{age}})"}));
+  }
+
+  Map nico = {"name": "Nico", "age": "25"};
+
+  @override
+  Map get startingVariables =>
+      {"person-adder": nico, "person-remover": this.nico};
 }
 
 String personLogFileContents = '''
@@ -41,6 +94,43 @@ String personLogFileContents = '''
 @generationAfter("person-remover", template: "-{{name}} ({{age}})")
 -Jane (29)
 ''';
+String expectedPersonGeneration = '''
+@generationAfter("no-id", template: "Uno\\ndos.")
+@generationBefore("no-id", template: "..\\nCatorce!")
++Jane (29)
++John (20)
+@generationBefore("person-adder")
+@generationAfter("person-remover", template: "-{{name}} ({{age}})")
+-John (20)
+-Jane (29)''';
+String expectedSecondPersonGeneration = '''
+@generationAfter("no-id", template: "Uno\\ndos.")
+@generationBefore("no-id", template: "..\\nCatorce!")
++Jane (29)
++John (20)
++Jack (21)
+@generationBefore("person-adder")
+@generationAfter("person-remover", template: "-{{name}} ({{age}})")
+-Jack (21)
+-John (20)
+-Jane (29)''';
+String expectedAllGeneration = '''
+@generationAfter("no-id", template: "Uno\\ndos.")
+Uno
+dos.
+..
+Catorce!
+@generationBefore("no-id", template: "..\\nCatorce!")
++Jane (29)
++John (20)
++Jack (21)
++Nico (25)
+@generationBefore("person-adder")
+@generationAfter("person-remover", template: "-{{name}} ({{age}})")
+-Nico (25)
+-Jack (21)
+-John (20)
+-Jane (29)''';
 
 defineTests() {
   File personsLogFile = new File(getPackageRootPath() + "test/persons.log");
@@ -52,11 +142,22 @@ defineTests() {
     tearDownAll(() {
       // personsLogFile.deleteSync();
     });
-    test('generates once', () async {
+    test('first person generation', () async {
       PersonGenerator generator = new PersonGenerator();
       GenerationResults results = await generator.execute();
-      expect(personsLogFile.readAsStringSync(), contains("+John (20)"));
-      expect(personsLogFile.readAsStringSync(), contains("-John (20)"));
+      expect(
+          personsLogFile.readAsStringSync(), equals(expectedPersonGeneration));
+    });
+    test('second person generation', () async {
+      SecondPersonGenerator generator = new SecondPersonGenerator();
+      GenerationResults results = await generator.execute();
+      expect(personsLogFile.readAsStringSync(),
+          equals(expectedSecondPersonGeneration));
+    });
+    test("Generation of all tags", () async {
+      AllGenerator allGenerator = new AllGenerator();
+      GenerationResults result = await allGenerator.execute();
+      expect(personsLogFile.readAsStringSync(), equals(expectedAllGeneration));
     });
   });
 }

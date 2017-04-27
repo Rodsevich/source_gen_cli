@@ -9,20 +9,26 @@ import './fileProcessorAnnotations/base.dart';
 import '../generators/utils/variablesResolver.dart';
 
 class FileProcessor extends GenerationModule<FileChanges> {
-  String tag;
-  Map<String, String> templates;
+  final List generationIdsExcluded, generationIds;
+  final Map<String, String> templates;
   List<FileProcessorSubmodule> submodules;
-  File file;
+  final File file;
   List<String> _input;
   List<_FileProcessingStep> _steps = [];
 
   FileProcessor(String relativePath,
-      {this.templates: null, List<FileProcessorSubmodule> submodules: const []})
-      : super(relativePath) {
-    this.submodules = new List.from(submodules, growable: true);
-    if (this.submodules.isEmpty)
-      this.submodules.addAll(fileProcessorSubmodules);
-    file = new File(getPackageRootPath() + relativePath);
+      {Map<String, String> templates,
+      List<FileProcessorSubmodule> processingSubmodules: const [],
+      List generationIds: const [],
+      List generationIdsExcluded: const []})
+      : super(relativePath),
+        this.generationIds = generationIds,
+        this.generationIdsExcluded = generationIdsExcluded,
+        this.file = new File(getPackageRootPath() + relativePath),
+        this.templates = templates {
+    this.submodules = processingSubmodules.isNotEmpty
+        ? processingSubmodules
+        : fileProcessorSubmodules;
     _input = file.readAsLinesSync();
     _input.insert(0, null); // Change 0-index to 1-indexed string
     Set<String> anotacionesMatcher =
@@ -38,19 +44,22 @@ class FileProcessor extends GenerationModule<FileChanges> {
         AnnotatedNode annotatedNode;
         FileProcessorSubmodule submodule =
             this.submodules.firstWhere((s) => s.inFileTrigger == name);
+        ArgumentsResolution args;
+        try {
+          String src = match.group(2);
+          args = new ArgumentsResolution.fromSourceConstants(src);
+        } catch (e) {
+          args = null;
+        }
+        if (!shouldProcessId(args.positional.first)) // The ID
+          continue;
         if (line.trim().startsWith('/') ||
             submodule is FileProcessorMarkerSubmodule) {
           //An annotation in a comment
-          String args;
-          try {
-            args = match.group(2);
-          } catch (e) {
-            args = null;
-          }
           annotationInstance = instantiate(
               submodule.annotation,
               "", //TODO: support also named constructors
-              new ArgumentsResolution.fromSourceConstants(args));
+              args);
         } else {
           _ParsedGenerationAnnotation p =
               _parseGenerationAnnotationWithNode(_input, lineNum, name);
@@ -101,12 +110,10 @@ class FileProcessor extends GenerationModule<FileChanges> {
   FileProcessResult execution() {
     logger.finest("Starting ${file.path} processing in ${_steps.length} steps");
     List<String> process = _input.sublist(0, _input.length);
-    int generatedLines;
     for (_FileProcessingStep step in _steps) {
       logger.finest(
           "Processing 'line ${step.annotationLine}: ${_input[step.annotationLine]}'");
-      generatedLines = process.length - _input.length;
-      step.annotationLine += generatedLines;
+      step.annotationLine += process.length - _input.length; //+ generated lines
       process = step.process(file.path, process, logger, varsResolver);
     }
     logger.finer("${file.path} processed. Generating differences...");
@@ -123,6 +130,15 @@ class FileProcessor extends GenerationModule<FileChanges> {
   List<String> get neededVariables => _steps
       .map((s) => s.neededVars())
       .reduce((List<String> e, List<String> s) => e.addAll(s));
+
+  bool shouldProcessId(String id) {
+    if (this.generationIds.isNotEmpty)
+      return generationIds.any((match) => id.contains(match));
+    else if (this.generationIdsExcluded.isNotEmpty)
+      return !generationIdsExcluded.any((match) => id.contains(match));
+    else
+      return true;
+  }
 }
 
 /// Used to return the processing results
@@ -147,9 +163,9 @@ class _FileProcessingStep {
   List<String> process(String path, List<String> input, Logger logger,
           VariablesResolver vars) =>
       (submodule is FileProcessorAnnotationSubmodule)
-          ? submodule.process(logger, vars, input, annotationLine, path,
-              template, node, annotation)
-          : submodule.process(
+          ? (submodule as FileProcessorAnnotationSubmodule).process(logger,
+              vars, input, annotationLine, path, template, node, annotation)
+          : (submodule as FileProcessorMarkerSubmodule).process(
               logger, vars, input, annotationLine, path, template, annotation);
 }
 
