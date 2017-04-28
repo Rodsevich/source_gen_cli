@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:mirrors';
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:logging/logging.dart';
@@ -10,29 +11,54 @@ import 'package:source_gen/src/annotation.dart';
 import "../lib/src/generation/fileProcessorAnnotations/base.dart";
 
 main(args) {
-  return asignarConTokens();
+  return probarTypes();
+  // return asignarConTokens();
   // return pruebaMaps();
   // return checkearInstantiacionAnotacion();
   // return procesadorDeArgs();
 }
 
-void err(String s, int n) {
-  print(s);
+probarTypes() {
+  print(tipos[0] is Padre);
+  print(tipos[1] is Padre);
+  print(tipos[1] is SORPI);
 }
 
-asignarConTokens() {
-  String asignarEsto = '"SORPI; PEDAZO DE PUTO!"';
-  String location = "<LOCATION>";
-  int lineNumber = 6;
-  var logger = new Logger("l");
-  File f = new File("tool/codigo_prueba.dart");
-  CompilationUnit c = parseCompilationUnit(f.readAsStringSync());
-  List<String> input = f.readAsLinesSync();
-  input.insert(0, null);
-  var annotatedNode = c.declarations.single; // as TopLevelVariableDeclaration;
+List<Type> tipos = [Hijo, Hermano];
 
-  print(input.join('\n'));
+abstract class Padre {
+  int a;
 }
+
+class Clase extends Padre {
+  int b;
+}
+
+class Hermano extends Padre {
+  int c;
+}
+
+class Hijo extends Clase {
+  int d;
+}
+
+// void err(String s, int n) {
+//   print(s);
+// }
+//
+// asignarConTokens() {
+//   String asignarEsto = '"SORPI; PEDAZO DE PUTO!"';
+//   String location = "<LOCATION>";
+//   int lineNumber = 6;
+//   var logger = new Logger("l");
+//   File f = new File("tool/codigo_prueba.dart");
+//   CompilationUnit c = parseCompilationUnit(f.readAsStringSync());
+//   List<String> input = f.readAsLinesSync();
+//   input.insert(0, null);
+//   var annotatedNode = c.declarations.single; // as TopLevelVariableDeclaration;
+//
+//   print(input.join('\n'));
+// }
 
 // pruebaMaps() {
 //   Map sorp = {};

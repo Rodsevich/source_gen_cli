@@ -51,8 +51,10 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
   List<String> get neededVariables;
 }
 
-/// Internal class used to provide [GenerationModule]s with [Logger] and
-/// [VariablesResolver]
+/// Internal class used to provide [GenerationModule]s with single instances of
+/// [Logger] and [VariablesResolver].
+/// They aren't put in the [GenerationModule]'s constructor to simplify the
+/// programming of [Generator]s
 class GeneratorModulesInitializer {
   VariablesResolver varsResolver;
   Logger logger;

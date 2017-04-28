@@ -11,8 +11,8 @@ class generationAssignment extends GenerationAnnotation {
 }
 
 /// Will process what will be assigned to a variable
-class Assignment extends FileProcessorAnnotationSubmodule {
-  Assignment() : super("generationAssignment", generationAssignment);
+class GenerationAssignment extends FileProcessorAnnotationSubmodule {
+  GenerationAssignment() : super("generationAssignment", generationAssignment);
 
   @override
   List<String> process(

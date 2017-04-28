@@ -14,10 +14,10 @@ part "./generationBefore.dart";
 part "./generationAfter.dart";
 
 @generationAssignment("generationAnnotations", append: true)
-List<FileProcessorAnnotationSubmodule> fileProcessorSubmodules = [
-  new Assignment(),
-  new GenerationBefore(),
-  new GenerationAfter(),
+List<Type> fileProcessorSubmodulesTypes = [
+  GenerationAssignment,
+  GenerationBefore,
+  GenerationAfter,
 ];
 
 ///Parent class of the annotations used for in-file generation
@@ -76,4 +76,8 @@ abstract class FileProcessorMarkerSubmodule extends FileProcessorSubmodule {
       String path,
       String generationTemplate,
       GenerationAnnotation annotationInstance);
+}
+
+class SubmoduleInstantiator {
+  List<FileProcessorSubmodule> submodules;
 }
