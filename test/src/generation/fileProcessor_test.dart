@@ -86,6 +86,16 @@ class AllGenerator extends Generator {
       {"person-adder": nico, "person-remover": this.nico};
 }
 
+String animalSorter = '''
+Animals list:
+@generationZone("animals", template: " -{{name}}")
+@generationZoneEnd
+
+Last Animal added:
+@generationZone("last-animal", template: "{{name}}")
+@generationZone("last-animal")
+''';
+
 String personLogFileContents = '''
 @generationAfter("no-id", template: "Uno\\ndos.")
 @generationBefore("no-id", template: "..\\nCatorce!")
@@ -140,7 +150,7 @@ defineTests() {
       personsLogFile.writeAsStringSync(personLogFileContents);
     });
     tearDownAll(() {
-      // personsLogFile.deleteSync();
+      personsLogFile.deleteSync();
     });
     test('first person generation', () async {
       PersonGenerator generator = new PersonGenerator();
