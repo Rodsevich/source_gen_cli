@@ -18,13 +18,13 @@ main(args) {
   // return procesadorDeArgs();
 }
 
+List<Type> tipos = [Hijo, Hermano];
+
 probarTypes() {
   print(tipos[0] is Padre);
   print(tipos[1] is Padre);
   print(tipos[1] is SORPI);
 }
-
-List<Type> tipos = [Hijo, Hermano];
 
 abstract class Padre {
   int a;

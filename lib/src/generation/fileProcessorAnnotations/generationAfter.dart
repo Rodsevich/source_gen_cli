@@ -6,8 +6,6 @@ class generationAfter extends GenerationAnnotation {
 }
 
 class GenerationAfter extends FileProcessorMarkerSubmodule {
-  GenerationAfter() : super("generationAfter", generationAfter);
-
   @override
   List<String> process(
       Logger logger,

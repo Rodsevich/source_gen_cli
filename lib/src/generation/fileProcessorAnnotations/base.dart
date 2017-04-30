@@ -30,12 +30,12 @@ abstract class GenerationAnnotation {
 /// Backbone class containing the necessary for in-file generation
 abstract class FileProcessorSubmodule {
   /// String used as pattern while reading files for matching this submodule
-  String inFileTrigger;
+  static String inFileTrigger;
 
   /// Eventual annotation that will be instantiated
-  Type annotation;
+  static Type annotation;
 
-  FileProcessorSubmodule(this.inFileTrigger, this.annotation);
+  FileProcessorSubmodule();
 
   void err(String msg, Logger logger) {
     logger.severe(msg);
@@ -45,9 +45,6 @@ abstract class FileProcessorSubmodule {
 
 /// Process an annotation, something that annotates an [AnnotatedNode]
 abstract class FileProcessorAnnotationSubmodule extends FileProcessorSubmodule {
-  FileProcessorAnnotationSubmodule(String inFileTrigger, Type annotation)
-      : super(inFileTrigger, annotation);
-
   /// Logic that will be executed in order to transform the `input`
   List<String> process(
       Logger logger,
@@ -64,9 +61,6 @@ abstract class FileProcessorAnnotationSubmodule extends FileProcessorSubmodule {
 /// anything, but is rather used to mark the position in the file from which
 /// to generate.
 abstract class FileProcessorMarkerSubmodule extends FileProcessorSubmodule {
-  FileProcessorMarkerSubmodule(String inFileTrigger, Type annotation)
-      : super(inFileTrigger, annotation);
-
   /// Logic that will be executed in order to transform the `input`
   List<String> process(
       Logger logger,
