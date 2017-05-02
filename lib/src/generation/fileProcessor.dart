@@ -57,7 +57,7 @@ class FileProcessor extends GenerationModule<FileChanges> {
         }
         if (!shouldProcessId(args.positional.first)) // The ID
           continue;
-        if (line.trim().startsWith('/') ||
+        if (line.trimLeft().startsWith('/') ||
             submodule is FileProcessorMarkerSubmodule) {
           //An annotation in a comment
           annotationInstance = instantiate(

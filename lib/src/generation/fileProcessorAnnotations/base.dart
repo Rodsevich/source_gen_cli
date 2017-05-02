@@ -72,6 +72,6 @@ abstract class FileProcessorMarkerSubmodule extends FileProcessorSubmodule {
       GenerationAnnotation annotationInstance);
 }
 
-class SubmoduleInstantiator {
+class SubmodulesProcessor {
   List<FileProcessorSubmodule> submodules;
 }
