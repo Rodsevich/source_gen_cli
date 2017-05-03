@@ -26,15 +26,19 @@ class FileProcessor extends GenerationModule<FileChanges> {
         this.generationIdsExcluded = generationIdsExcluded,
         this.file = new File(getPackageRootPath() + relativePath),
         this.templates = templates {
+    //Join the submodules by default with the provided ones (if any)
     this.submodules = processingSubmodules.isNotEmpty
         ? processingSubmodules
         : fileProcessorSubmodules;
+
+    //Read onlu once the file
     _input = file.readAsLinesSync();
     _input.insert(0, null); // Change 0-index to 1-indexed string
-    Set<String> anotacionesMatcher =
-        new Set.from(this.submodules.map((s) => s.inFileTrigger));
-    String matchOptions = anotacionesMatcher.join('|');
-    RegExp annotationsMatcher = new RegExp("@($matchOptions)" + r"(\(.*\))?");
+
+    //Make an annotation matcher used to search for annotations in the file
+    RegExp annotationsMatcher = _makeAnnotationMatcher(this.submodules);
+
+    //Scan line by line for matching annotations
     for (int lineNum = 1; lineNum < _input.length; lineNum++) {
       String line = _input[lineNum];
       Match match = annotationsMatcher.firstMatch(line);
@@ -138,6 +142,13 @@ class FileProcessor extends GenerationModule<FileChanges> {
       return !generationIdsExcluded.any((match) => id.contains(match));
     else
       return true;
+  }
+
+  RegExp _makeAnnotationMatcher(List<FileProcessorSubmodule> submodules) {
+    Set<String> anotacionesMatcher =
+        new Set.from(submodules.map((s) => s.inFileTrigger));
+    String matchOptions = anotacionesMatcher.join('|');
+    return new RegExp("@($matchOptions)" + r"(\(.*\))?");
   }
 }
 
