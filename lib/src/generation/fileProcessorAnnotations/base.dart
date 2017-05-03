@@ -72,6 +72,10 @@ abstract class FileProcessorMarkerSubmodule extends FileProcessorSubmodule {
       GenerationAnnotation annotationInstance);
 }
 
-class SubmodulesProcessor {
-  List<FileProcessorSubmodule> submodules;
+class SubmodulesProcessingEngine {
+  List<Type> submodules;
+
+  SubmodulesProcessingEngine(this.submodules);
+
+  List<FileProcessorSubmodule> processInput(List<String> input, String path) {}
 }
