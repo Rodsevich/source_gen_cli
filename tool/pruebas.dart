@@ -21,21 +21,34 @@ main(args) {
 List<Type> tipos = [Hijo, Hermano];
 
 probarTypes() {
+  Clase clase = new Clase();
+  List<TypeMirror> mirrors = tipos.map((t) => reflectType(t)).toList();
+  TypeMirror p = reflectType(Padre);
+  TypeMirror c = reflectType(Clase);
+  print(c.isSubtypeOf(p));
   print(tipos[0] is Padre);
+  print(new Hijo() is Padre);
+  print(mirrors[0].isSubtypeOf(reflectType(Padre)));
   print(tipos[1] is Padre);
-  print(tipos[1] is SORPI);
+  print(Padre.numero);
+  print(Clase.numero);
+  print(Hermano.numero);
+  print(c.numero);
 }
 
 abstract class Padre {
   int a;
+  static int numero = 0;
 }
 
 class Clase extends Padre {
   int b;
+  static int numero = 1;
 }
 
 class Hermano extends Padre {
   int c;
+  static int numero = 2;
 }
 
 class Hijo extends Clase {
