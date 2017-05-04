@@ -32,13 +32,11 @@ probarTypes() {
   print(tipos[1] is Padre);
   print(Padre.numero);
   print(Clase.numero);
-  print(Hermano.numero);
-  print(c.numero);
 }
 
 abstract class Padre {
   int a;
-  static int numero = 0;
+  static int numero;
 }
 
 class Clase extends Padre {
@@ -46,9 +44,14 @@ class Clase extends Padre {
   static int numero = 1;
 }
 
-class Hermano extends Padre {
+abstract class InterfazNumero {
+  static int numero1;
+  static int numero2;
+  static int numero3;
+}
+
+class Hermano extends Padre implements InterfazNumero {
   int c;
-  static int numero = 2;
 }
 
 class Hijo extends Clase {

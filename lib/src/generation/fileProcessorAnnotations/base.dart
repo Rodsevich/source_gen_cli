@@ -74,8 +74,10 @@ abstract class FileProcessorMarkerSubmodule extends FileProcessorSubmodule {
 
 class SubmodulesProcessingEngine {
   List<Type> submodules;
+  List<String> input;
+  String path;
 
   SubmodulesProcessingEngine(this.submodules);
 
-  List<FileProcessorSubmodule> processInput(List<String> input, String path) {}
+  List<FileProcessorSubmodule> process(Logger logger, VariablesResolver vars) {}
 }
