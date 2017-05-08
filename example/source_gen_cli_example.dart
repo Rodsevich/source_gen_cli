@@ -2,6 +2,7 @@
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
 import 'package:source_gen_cli/generator.dart';
+import 'package:source_gen_cli/src/generators/base.dart';
 
 class DependencyGenerator extends Generator {
   @override
@@ -14,11 +15,12 @@ class DependencyGenerator extends Generator {
   DependencyGenerator() {
     addDependency(new Dependency("gun", "any"));
   }
-  @override
-  bool get overridePolicy => false;
   // TODO: implement startingVariables
   @override
   Map get startingVariables => null;
+  // TODO: implement overridePolicy
+  @override
+  OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 }
 
 main() {}

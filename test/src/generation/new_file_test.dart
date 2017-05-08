@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:logging/logging.dart';
+import 'package:source_gen_cli/generator.dart';
 import 'package:source_gen_cli/src/common.dart';
 import 'package:source_gen_cli/src/generation/base.dart';
 import 'package:source_gen_cli/src/generation/new_file.dart';
@@ -37,8 +38,8 @@ defineTests() {
     test("Generates processed output where it should", () async {
       Logger logger = new Logger("test");
       VariablesResolver resolver = new VariablesResolver();
-      GeneratorModulesInitializer initializer =
-          new GeneratorModulesInitializer(resolver, logger, false);
+      GeneratorModulesInitializer initializer = new GeneratorModulesInitializer(
+          resolver, logger, OverridingPolicy.ALWAYS);
       String src = "{{#iterate}}{{var}} # {{/iterate}}{{var2}}";
       String dest = "test/ejecucion.txt";
       List<Map> listMap = [

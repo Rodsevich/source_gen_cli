@@ -24,10 +24,10 @@ class FileGenerationModule extends GenerationModule<File> {
   ///
   /// If the [File] to create already exists, by default an [Exception] will be
   /// raised, this can be omitted by setting the `allowOverride` flag to `true`
-  FileGenerationModule(String sourceString, String relativePathDestination,
+  FileGenerationModule(String contents, String relativePathDestination,
       {this.processInputWithMustache: true, this.allowOverride: false})
       : super(relativePathDestination),
-        this.sourceString = sourceString;
+        this.sourceString = contents;
 
   /// If the file to copy is named `name.extension.mustache` the generated [File]
   /// will be the result of the processing of the source one into `name.extension`

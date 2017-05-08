@@ -6,6 +6,7 @@ import '../generators/utils/variablesResolver.dart';
 
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:source_gen_cli/src/generators/base.dart';
 
 /// The internal base class of any operation that will be performed in the
 /// workflow of the [Generator]s.
@@ -15,11 +16,11 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
   String _pathDestination;
   Logger _logger;
   bool _overrideConfigured = false;
-  bool _override;
+  OverridingPolicy _override;
 
-  bool get override => _override;
+  OverridingPolicy get override => _override;
 
-  void set override(bool override) {
+  void set override(OverridingPolicy override) {
     _override = override;
     _overrideConfigured = true;
   }
@@ -34,7 +35,7 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
   String get pathDestination => _pathDestination;
 
   /// Normalizes and absolutizes a relative to the package path and sets it
-  GenerationModule(String relativePath, [bool override]) {
+  GenerationModule(String relativePath, [OverridingPolicy overridingPolicy]) {
     String norm = path.normalize(relativePath);
     String thisPkg = getPackageRootPath();
     String abs = path.normalize(path.join(thisPkg, norm));
@@ -42,8 +43,8 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
       throw new Exception(
           "$relativePath goes outside of current package ($thisPkg)");
     this._pathDestination = abs;
-    if (override != null) {
-      this.override = override;
+    if (overridingPolicy != null) {
+      this.override = overridingPolicy;
     }
   }
 
@@ -56,7 +57,7 @@ abstract class GenerationModule<T> extends GenerationStep<GenerationResult<T>> {
 class GeneratorModulesInitializer {
   VariablesResolver varsResolver;
   Logger logger;
-  bool overridingDefaultValue;
+  OverridingPolicy overridingDefaultValue;
 
   GeneratorModulesInitializer(
       this.varsResolver, this.logger, this.overridingDefaultValue);

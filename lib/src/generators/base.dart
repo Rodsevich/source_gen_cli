@@ -6,6 +6,9 @@ import './utils/sequencer.dart';
 import './utils/variablesResolver.dart';
 
 import 'package:logging/logging.dart';
+import 'package:source_gen_cli/src/generation/fileProcessor.dart';
+import 'package:source_gen_cli/src/generation/new_dir.dart';
+import 'package:source_gen_cli/src/generation/new_file.dart';
 
 /// The base class from where the generation will took place. This is the
 /// backbone of the generation and is the starting point from where new
@@ -37,7 +40,7 @@ abstract class Generator {
 
   /// The, by default, `override` value this [Generator]'s [GeneratorModule]
   /// will have
-  bool get overridePolicy;
+  OverridingPolicy get overridePolicy;
 
   /// Define the dependencies this generator needs in order to work properly,
   /// they will be automatically included or updated in the local 'pubspec.yaml'
@@ -71,6 +74,27 @@ abstract class Generator {
   //   return completer.future;
   // }
 
+  /// Syntactic-sugar for standard processing of a file. _Id est_ interacting
+  /// with all its annotatons
+  Future<FileProcessResult> processFile(String relativePath) {
+    FileProcessor fileProcessor = new FileProcessor(relativePath);
+    return addGenerationStep(fileProcessor);
+  }
+
+  /// Syntactic-sugar for a new [File] creation
+  Future<FileGenerationResult> createFile(
+      String contents, String relativePathDestination) {
+    FileGenerationModule fileGeneration =
+        new FileGenerationModule(contents, relativePathDestination);
+    addGenerationStep(fileGeneration);
+  }
+
+  /// Syntactic-sugar for a new [Directory] creation
+  Future<DirGenerationResult> createDir(String relativePath) {
+    DirGenerationModule dirGeneration = new DirGenerationModule(relativePath);
+    addGenerationStep(dirGeneration);
+  }
+
   void _addPredefinedDeps() {
     if (_predefinedDependenciesAdded == false &&
         alwaysNeededDependencies.isNotEmpty) {
@@ -90,6 +114,8 @@ abstract class Generator {
     // return completer.future;
   }
 }
+
+enum OverridingPolicy { NEVER, ASK, ALWAYS }
 
 class GenerationResults {
   String newPubspecLines;

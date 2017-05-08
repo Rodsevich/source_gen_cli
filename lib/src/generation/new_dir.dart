@@ -3,6 +3,8 @@ import 'dart:async';
 import './base.dart';
 import '../common.dart';
 
+import 'package:source_gen_cli/src/generators/base.dart';
+
 class DirGenerationModule extends GenerationModule<Directory> {
   Directory directory;
 
@@ -16,10 +18,10 @@ class DirGenerationModule extends GenerationModule<Directory> {
 
   /// Determine if an already existing [Directory] should be deleted and
   /// generated again by this [DirGenerationModule]
-  bool override;
+  OverridingPolicy override;
 
   DirGenerationModule(String relativePath,
-      {this.override: false, this.generateRecursively: false})
+      {this.override: OverridingPolicy.NEVER, this.generateRecursively: false})
       : super(relativePath, override) {
     this.directory = new Directory(this.pathDestination);
   }
@@ -38,7 +40,7 @@ class DirGenerationModule extends GenerationModule<Directory> {
     bool overriden;
     if (directory.existsSync()) {
       logger.warning("${directory.path} already exists (override: $override)");
-      if (override) {
+      if (override == OverridingPolicy.ALWAYS) {
         logger.fine("Overriding existing Dir: ${directory.path}");
         for (FileSystemEntity ent in directory.listSync()) {
           logger.finer("Deleting ${ent.path}");

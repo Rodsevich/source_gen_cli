@@ -18,9 +18,6 @@ class PersonGenerator extends Generator {
   @override
   String get name => "PeopleGeneration";
 
-  @override
-  bool get overridePolicy => true;
-
   PersonGenerator() {
     addGenerationStep(new FileProcessor("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"},
@@ -32,6 +29,9 @@ class PersonGenerator extends Generator {
         "person-adder": {"name": "John", "age": "20"},
         "person-remover": {"name": "John", "age": "20"}
       };
+  // TODO: implement overridePolicy
+  @override
+  OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 }
 
 class SecondPersonGenerator extends Generator {
@@ -46,7 +46,7 @@ class SecondPersonGenerator extends Generator {
   String get name => "Second Person-Generation";
 
   @override
-  bool get overridePolicy => true;
+  OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
   SecondPersonGenerator() {
     addGenerationStep(new FileProcessor("test/persons.log",
@@ -72,7 +72,7 @@ class AllGenerator extends Generator {
   String get name => "AllGenerator";
 
   @override
-  bool get overridePolicy => true;
+  OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
   AllGenerator() {
     addGenerationStep(new FileProcessor("test/persons.log",
