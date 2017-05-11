@@ -1,20 +1,24 @@
 library interactions.backbone;
 
+import 'dart:async';
+
+//@generationParts("generationBaseInteractions")
 part "./confirmation.dart";
 part "./selection.dart";
 part "./input.dart";
 
-import 'dart:async';
-
 /// Father class of every interaction the [Generator]s have with the user.
-abstract class Interaction {
+abstract class Interaction<R> {
   String message;
+  IOInterface ioInterface;
+
+  Interaction(this.ioInterface, this.message);
 
   void displayMessage(String message);
 
   void handleInvalidInput(String input);
 
-  Future<String> finalValue;
+  Future<R> finalValue;
 }
 
 abstract class InteractionsInterface {
@@ -25,15 +29,15 @@ abstract class InteractionsInterface {
 
 /// The entity in charge of instantiating and handling the [Interaction]s
 abstract class InteractionsHandler implements InteractionsInterface {
-  IOStrategy ioStrategy;
-  InteractionsHandler(this.ioStrategy);
+  IOInterface ioInterface;
+  InteractionsHandler(this.ioInterface);
   Future<bool> askForConfirmation(String message);
   Future<String> askForInput(String message, String checkRegExp);
   Future<String> askForSelection(String message, List<String> options);
 }
 
 /// Father class of the interface to the IO operations with the user
-abstract class IOStrategy {
+abstract class IOInterface {
   void print(String contents);
   Stream<String> read;
 }
