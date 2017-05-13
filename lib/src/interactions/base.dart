@@ -21,6 +21,8 @@ abstract class Interaction<R> {
   Future<R> finalValue;
 }
 
+/// The interface that shoiuld be implemented by both the [Generator] and the
+/// [InteractionsHandler] in order to provide an easy-to-use API in [Generator]s
 abstract class InteractionsInterface {
   Future<bool> askForConfirmation(String message);
   Future<String> askForInput(String message, String checkRegExp);
@@ -31,13 +33,10 @@ abstract class InteractionsInterface {
 abstract class InteractionsHandler implements InteractionsInterface {
   IOInterface ioInterface;
   InteractionsHandler(this.ioInterface);
-  Future<bool> askForConfirmation(String message);
-  Future<String> askForInput(String message, String checkRegExp);
-  Future<String> askForSelection(String message, List<String> options);
 }
 
 /// Father class of the interface to the IO operations with the user
 abstract class IOInterface {
   void print(String contents);
-  Stream<String> read;
+  Stream<String> get read;
 }

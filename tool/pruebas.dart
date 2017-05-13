@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
@@ -7,13 +8,77 @@ import 'package:logging/logging.dart';
 import "package:path/path.dart" as path;
 import '../lib/src/common.dart';
 import 'package:source_gen/src/annotation.dart';
+import 'package:console/console.dart';
 import "../lib/src/generation/fileProcessorAnnotations/base.dart";
 
 main(args) {
-  return asignarConTokens();
+  return stdinStream();
+  // return probarStds();
+  // return asignarConTokens();
   // return pruebaMaps();
   // return checkearInstantiacionAnotacion();
   // return procesadorDeArgs();
+}
+
+stdinStream() {
+  stdin.lineMode = false;
+  stdin.echoMode = false;
+  int c = 0;
+  stdin
+      .asBroadcastStream()
+      .map((List<int> i) => new String.fromCharCodes(i))
+      .listen((String input) {
+    TextPen pen = new TextPen();
+    if (c++ == 8) c = 0;
+    pen.setColor(new Color(c));
+    pen(input);
+    pen.normal();
+    stdout.write(pen.toString());
+  });
+}
+
+probarStds() {
+  TextPen pen = new TextPen();
+  TimeDisplay timer;
+  String message = "Escribí un número";
+  stdout.write(message);
+  RegExp regExp = new RegExp(r"^[0-9]+$");
+  String inputStr = "";
+  stdin.lineMode = false;
+  stdin.echoMode = false;
+  bool end = false;
+  while (!end) {
+    int inputCharCode = stdin.readByteSync();
+    if (inputCharCode == 127) {
+      //backspace
+      if (inputStr.isNotEmpty)
+        inputStr = inputStr.substring(0, inputStr.length - 1);
+    } else if (inputCharCode == 10) {
+      //Enter
+      if (inputStr.contains(regExp)) {
+        end = true;
+        continue;
+      }
+    } else {
+      inputStr += new String.fromCharCode(inputCharCode);
+    }
+    pen.reset();
+    if (inputStr.contains(regExp))
+      pen.green();
+    else
+      pen.red();
+    pen(inputStr);
+    pen.normal();
+    Console.overwriteLine("$message: $pen");
+    // stdout.write(pen.buffer);
+  }
+  print("");
+  stdin.lineMode = true;
+  stdin.echoMode = true;
+  // .map((List<int> i) => i.map((q) => q + 1))
+  // .map((List<int> i) => new String.fromCharCodes(i))
+  // .map((i) => "\e[5m\e[1m\e[93m\e[101m$i\e[0m")
+  // .pipe(stdout);
 }
 
 void err(String s, int n) {
@@ -34,41 +99,41 @@ asignarConTokens() {
   print(input.join('\n'));
 }
 
-// pruebaMaps() {
-//   Map sorp = {};
-//   print(null);
-//   print(sorp["nulo"]);
-// }
+pruebaMaps() {
+  Map sorp = {};
+  print(null);
+  print(sorp["nulo"]);
+}
 
-// procesadorDeArgs() {
-//   String source = "(1,'dos',#tres)";
-//   String funcSrc = "var q = a$source;";
-//   CompilationUnit c = parseCompilationUnit(funcSrc);
-//   var t = c.declarations.single as TopLevelVariableDeclaration;
-//   VariableDeclaration de = t.childEntities.first.variables.first;
-//   Expression expression = de.initializer;
-//   ArgumentList args = (expression as MethodInvocation).argumentList;
-//   exit(0);
-// }
+procesadorDeArgs() {
+  String source = "(1,'dos',#tres)";
+  String funcSrc = "var q = a$source;";
+  CompilationUnit c = parseCompilationUnit(funcSrc);
+  var t = c.declarations.single as TopLevelVariableDeclaration;
+  VariableDeclaration de = t.childEntities.first.variables.first;
+  Expression expression = de.initializer;
+  ArgumentList args = (expression as MethodInvocation).argumentList;
+  exit(0);
+}
 
-// class Clazz {
-//   int number;
-//   Clazz(this.number);
-// }
-//
-// checkClassInstantiation() {
-//   var reflec = reflectClass(Clazz);
-//   Clazz instance = reflec.newInstance(new Symbol(''), [1]).reflectee;
-//   assert(instance.number == 1);
-// }
+class Clazz {
+  int number;
+  Clazz(this.number);
+}
 
-// checkearInstantiacionAnotacion() {
-//   Type clase = GenerationAssignment;
-//   var reflejador = reflectClass(clase);
-//   GenerationAssignment instancia =
-//       reflejador.newInstance(new Symbol(''), []).reflectee;
-//   assert(instancia.generatorIdentifier == "sorp");
-// }
+checkClassInstantiation() {
+  var reflec = reflectClass(Clazz);
+  Clazz instance = reflec.newInstance(new Symbol(''), [1]).reflectee;
+  assert(instance.number == 1);
+}
+
+checkearInstantiacionAnotacion() {
+  Type clase = GenerationAssignment;
+  var reflejador = reflectClass(clase);
+  GenerationAssignment instancia =
+      reflejador.newInstance(new Symbol(''), []).reflectee;
+  assert(instancia.generatorIdentifier == "sorp");
+}
 
 // // for var i in ... works
 // List<String> s = ["sorp", "longa", "ponga"];
