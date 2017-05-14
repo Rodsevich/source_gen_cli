@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:mirrors';
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:logging/logging.dart';
@@ -125,14 +126,6 @@ checkClassInstantiation() {
   var reflec = reflectClass(Clazz);
   Clazz instance = reflec.newInstance(new Symbol(''), [1]).reflectee;
   assert(instance.number == 1);
-}
-
-checkearInstantiacionAnotacion() {
-  Type clase = GenerationAssignment;
-  var reflejador = reflectClass(clase);
-  GenerationAssignment instancia =
-      reflejador.newInstance(new Symbol(''), []).reflectee;
-  assert(instancia.generatorIdentifier == "sorp");
 }
 
 // // for var i in ... works

@@ -13,5 +13,26 @@ class CLInterface extends IOInterface {
 
   void print(String contents) => stdout.write(contents);
 
-  Stream<String> get read => stdin.listen(onData);
+  Stream<String> get read => stdin
+      .asBroadcastStream()
+      .map((List<int> i) => new String.fromCharCodes(i));
+}
+
+class CLIInteractionsHandler extends InteractionsHandler {
+  CLIInteractionsHandler(CLInterface clInterface) : super(clInterface);
+
+  @override
+  Future<bool> askForConfirmation(String message) {
+    // TODO: implement askForConfirmation
+  }
+
+  @override
+  Future<String> askForInput(String message, String checkRegExp) {
+    // TODO: implement askForInput
+  }
+
+  @override
+  Future<String> askForSelection(String message, List<String> options) {
+    // TODO: implement askForSelection
+  }
 }
