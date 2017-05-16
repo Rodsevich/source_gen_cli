@@ -6,16 +6,32 @@ class CLInterface extends IOInterface {
   Stdin stdin;
   Stdout stdout;
 
-  CLInterface(this.stdin, this.stdout) {
+  bool echoMode;
+  bool lineMode;
+
+  CLInterface(this.stdin, this.stdout);
+
+  bool setUp() {
+    echoMode = stdin.echoMode;
+    lineMode = stdin.lineMode;
     stdin.echoMode = false;
     stdin.lineMode = false;
   }
 
+  bool tearDown() {
+    stdin.echoMode = echoMode;
+    stdin.lineMode = lineMode;
+  }
+
   void print(String contents) => stdout.write(contents);
 
-  Stream<String> get read => stdin
+  Stream<String> get readChar => stdin
       .asBroadcastStream()
       .map((List<int> i) => new String.fromCharCodes(i));
+
+  Stream<List<int>> get charCode => stdin.asBroadcastStream();
+
+  Stream<String> get readInput => stdin.readLineSync();
 }
 
 class CLIInteractionsHandler extends InteractionsHandler {

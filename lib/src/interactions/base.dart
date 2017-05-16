@@ -9,16 +9,12 @@ part "./input.dart";
 
 /// Father class of every interaction the [Generator]s have with the user.
 abstract class Interaction<R> {
-  String message;
   IOInterface ioInterface;
+  String message;
 
   Interaction(this.ioInterface, this.message);
 
-  void displayMessage(String message);
-
-  void handleInvalidInput(String input);
-
-  Future<R> finalValue;
+  Future<R> execution();
 }
 
 /// The interface that shoiuld be implemented by both the [Generator] and the
@@ -35,8 +31,29 @@ abstract class InteractionsHandler implements InteractionsInterface {
   InteractionsHandler(this.ioInterface);
 }
 
-/// Father class of the interface to the IO operations with the user
+/// Father class of the interface to the IO operations with the user. It's used
+/// to provide a common interface to every platform in which the generators
+/// could be ran in order to provide universal execution
 abstract class IOInterface {
+  IOInterface() {
+    setUp();
+  }
+
+  /// Function to be executed at the beginning of this [IOInterface] usage
+  bool setUp();
+
+  /// Function to be executed at the end of this [IOInterface] usage
+  bool tearDown();
+
+  /// Show to the user the provided `contents` parameter [String]
   void print(String contents);
-  Stream<String> get read;
+
+  /// Get from the user single readable chars inputted
+  Stream<String> get readChar;
+
+  /// Get from the user a complete inputted [String], an example could be readLn
+  Stream<String> get readInput;
+
+  /// Get from the user every char key code inputted
+  Stream<List<int>> get charCode;
 }
