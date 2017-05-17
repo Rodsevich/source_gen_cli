@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:async";
 import '../generation/base.dart';
+import '../interactions/base.dart';
 import '../generation/dependency.dart';
 import './utils/sequencer.dart';
 import './utils/variablesResolver.dart';
@@ -13,7 +14,7 @@ import 'package:source_gen_cli/src/generation/new_file.dart';
 /// The base class from where the generation will took place. This is the
 /// backbone of the generation and is the starting point from where new
 /// [Generator]s shall start.
-abstract class Generator {
+abstract class Generator implements SynchronousInteractionsInterface {
   DependenciesProcessor _depsProcessor = new DependenciesProcessor();
   GeneratorModulesInitializer _modulesInitializer;
   bool _predefinedDependenciesAdded = false;
@@ -21,8 +22,9 @@ abstract class Generator {
   GenerationStepsSequencer _sequencer = new GenerationStepsSequencer();
   VariablesResolver variablesResolver;
   Logger logger;
+  InteractionsHandler interactionsHandler;
 
-  Generator() {
+  Generator(this.interactionsHandler) {
     variablesResolver = new VariablesResolver(this.startingVariables);
     logger = new Logger("generator." + this.runtimeType.toString());
     _modulesInitializer = new GeneratorModulesInitializer(
@@ -112,6 +114,21 @@ abstract class Generator {
       ret.pubGetResult = await _depsProcessor.runPubGet();
     return ret;
     // return completer.future;
+  }
+
+  @override
+  bool askForConfirmation(String message, {bool defaultValue: true}) {
+    // TODO: implement askForConfirmation
+  }
+
+  @override
+  String askForInput(String message, String checkRegExp) {
+    // TODO: implement askForInput
+  }
+
+  @override
+  String askForSelection(String message, List<String> options) {
+    // TODO: implement askForSelection
   }
 }
 

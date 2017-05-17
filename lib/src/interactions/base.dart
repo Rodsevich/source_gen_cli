@@ -17,12 +17,19 @@ abstract class Interaction<R> {
   Future<R> execution();
 }
 
-/// The interface that shoiuld be implemented by both the [Generator] and the
-/// [InteractionsHandler] in order to provide an easy-to-use API in [Generator]s
+/// The interface that should be primarily implemented by the [InteractionsHandler]
 abstract class InteractionsInterface {
-  Future<bool> askForConfirmation(String message);
+  Future<bool> askForConfirmation(String message, {bool defaultValue: true});
   Future<String> askForInput(String message, String checkRegExp);
   Future<String> askForSelection(String message, List<String> options);
+}
+
+/// The interface that should be implemented by [Generator] in order to provide
+/// an easy-to-use API in the programming of [Generator]s
+abstract class SynchronousInteractionsInterface {
+  bool askForConfirmation(String message, {bool defaultValue: true});
+  String askForInput(String message, String checkRegExp);
+  String askForSelection(String message, List<String> options);
 }
 
 /// The entity in charge of instantiating and handling the [Interaction]s
