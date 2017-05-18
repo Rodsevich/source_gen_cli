@@ -3,6 +3,7 @@
 
 import 'package:source_gen_cli/generator.dart';
 import 'package:source_gen_cli/src/generators/base.dart';
+import 'package:source_gen_cli/src/interactions/base.dart';
 
 class DependencyGenerator extends Generator {
   @override
@@ -12,7 +13,8 @@ class DependencyGenerator extends Generator {
   @override
   List<Dependency> get alwaysNeededDependencies =>
       [new Dependency("github", "any")];
-  DependencyGenerator() {
+  DependencyGenerator(InteractionsHandler interactionsHandler)
+      : super(interactionsHandler) {
     addDependency(new Dependency("gun", "any"));
   }
   // TODO: implement startingVariables

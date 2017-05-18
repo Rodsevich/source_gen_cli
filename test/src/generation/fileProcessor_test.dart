@@ -4,6 +4,7 @@ import 'package:source_gen_cli/src/generation/fileProcessor.dart';
 import 'package:source_gen_cli/src/generators/base.dart';
 import 'package:source_gen_cli/src/generators/utils/variablesResolver.dart';
 import 'package:source_gen_cli/src/common.dart';
+import 'package:source_gen_cli/src/interactions/base.dart';
 import 'package:test/test.dart';
 
 main() => defineTests();
@@ -18,7 +19,8 @@ class PersonGenerator extends Generator {
   @override
   String get name => "PeopleGeneration";
 
-  PersonGenerator() {
+  PersonGenerator(InteractionsHandler interactionsHandler)
+      : super(interactionsHandler) {
     addGenerationStep(new FileProcessor("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"},
         generationIds: [new RegExp("person-.*")]));
@@ -48,7 +50,7 @@ class SecondPersonGenerator extends Generator {
   @override
   OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
-  SecondPersonGenerator() {
+  SecondPersonGenerator() : super(null) {
     addGenerationStep(new FileProcessor("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"},
         generationIdsExcluded: ["no-id"]));
@@ -74,7 +76,7 @@ class AllGenerator extends Generator {
   @override
   OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
-  AllGenerator() {
+  AllGenerator() : super(null) {
     addGenerationStep(new FileProcessor("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"}));
   }

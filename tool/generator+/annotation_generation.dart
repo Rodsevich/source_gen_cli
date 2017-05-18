@@ -1,5 +1,6 @@
 import 'dart:io';
 import "package:source_gen_cli/generator.dart";
+import 'package:source_gen_cli/src/interactions/base.dart';
 
 class AnnotationGeneration extends Generator {
   String get name => "generationAnnotation's generator";
@@ -10,7 +11,8 @@ class AnnotationGeneration extends Generator {
   OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
   Map get startingVariables => null;
 
-  AnnotationGeneration() {
+  AnnotationGeneration(InteractionsHandler interactionsHandler)
+      : super(interactionsHandler) {
     String base = "lib/src/generation/fileProcessorAnnotation";
     String contents = new File("$base/template.mustache").readAsStringSync();
     String name = variablesResolver.get("name");
