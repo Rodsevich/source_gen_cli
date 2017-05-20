@@ -12,7 +12,8 @@ import 'package:source_gen_cli/src/generation/new_file.dart';
 class TemplateGenerationModule
     extends GenerationModule<List<GenerationResult>> {
   String generationRelativePath;
-  List<GenerationModule> templateModules = [];
+  List<FileGenerationModule> fileTemplateModules = [];
+  List<DirGenerationModule> dirTemplateModules = [];
 
   TemplateGenerationModule(
       String templateRelativePath, this.generationRelativePath)
@@ -21,19 +22,36 @@ class TemplateGenerationModule
         new Directory(getPackageRootPath() + templateRelativePath);
     for (FileSystemEntity entity in sourceDir.listSync()) {
       if (entity is File)
-        this.templateModules.add(new FileGenerationModule.fromExistingFile(
-            entity, generationRelativePath));
+        this.fileTemplateModules.add(new FileGenerationModule.fromExistingFile(
+            entity, generationRelativePath,
+            processInputWithMustache: (entity.path.endsWith(".mustache") &&
+                entity.path.split('.').length > 2)));
       else if (entity is Directory) {
-        this.templateModules.add(new DirGenerationModule(entity.path));
+        this.dirTemplateModules.add(new DirGenerationModule(entity.path));
       }
     }
   }
 
-  GenerationResult<List<GenerationResult>> execution() {}
+  GenerationResult<List<GenerationResult>> execution() {
+    GeneratorModulesInitializer initializer = new GeneratorModulesInitializer(
+        this.varsResolver, this.logger, this.override);
+    List<DirGenerationResult> dirResults = [];
+    List<FileGenerationResult> fileResults = [];
+    for (DirGenerationModule dirGM in dirTemplateModules) {
+      initializer.initialize(dirGM);
+      dirResults.add(dirGM.execution());
+    }
+    for (FileGenerationModule fileGM in fileTemplateModules) {
+      initializer.initialize(fileGM);
+      fileResults.add(fileGM.execution());
+    }
+  }
 
   @override
-  List<String> get neededVariables => this
-      .templateModules
+  List<String> get neededVariables => fileTemplateModules
       .map((GenerationModule module) => module.neededVariables)
-      .reduce((List<String> l1, List<String> l2) => l1.addAll(l2));
+      .reduce((List<String> l1, List<String> l2) => l1.addAll(l2))
+      .addAll(dirTemplateModules
+          .map((GenerationModule module) => module.neededVariables)
+          .reduce((List<String> l1, List<String> l2) => l1.addAll(l2)));
 }

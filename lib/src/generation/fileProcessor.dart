@@ -8,7 +8,7 @@ import '../generation/base.dart';
 import './fileProcessorAnnotations/base.dart';
 import '../generators/utils/variablesResolver.dart';
 
-class FileProcessor extends GenerationModule<FileChanges> {
+class FileProcessorModule extends GenerationModule<FileChanges> {
   final List generationIdsExcluded, generationIds;
   final Map<String, String> templates;
   List<FileProcessorSubmodule> submodules;
@@ -16,7 +16,7 @@ class FileProcessor extends GenerationModule<FileChanges> {
   List<String> _input;
   List<_FileProcessingStep> _steps = [];
 
-  FileProcessor(String relativePath,
+  FileProcessorModule(String relativePath,
       {Map<String, String> templates,
       List<FileProcessorSubmodule> processingSubmodules: const [],
       List generationIds: const [],
@@ -159,7 +159,7 @@ class _ParsedGenerationAnnotation {
   _ParsedGenerationAnnotation(this.instance, this.node);
 }
 
-/// Internal class used by [FileProcessor] for execution when needed
+/// Internal class used by [FileProcessorModule] for execution when needed
 class _FileProcessingStep {
   FileProcessorSubmodule submodule;
   AnnotatedNode node;

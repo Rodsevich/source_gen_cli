@@ -21,7 +21,7 @@ class PersonGenerator extends Generator {
 
   PersonGenerator(InteractionsHandler interactionsHandler)
       : super(interactionsHandler) {
-    addGenerationStep(new FileProcessor("test/persons.log",
+    addGenerationStep(new FileProcessorModule("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"},
         generationIds: [new RegExp("person-.*")]));
   }
@@ -51,7 +51,7 @@ class SecondPersonGenerator extends Generator {
   OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
   SecondPersonGenerator() : super(null) {
-    addGenerationStep(new FileProcessor("test/persons.log",
+    addGenerationStep(new FileProcessorModule("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"},
         generationIdsExcluded: ["no-id"]));
   }
@@ -77,7 +77,7 @@ class AllGenerator extends Generator {
   OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
   AllGenerator() : super(null) {
-    addGenerationStep(new FileProcessor("test/persons.log",
+    addGenerationStep(new FileProcessorModule("test/persons.log",
         templates: {"person-adder": "+{{name}} ({{age}})"}));
   }
 

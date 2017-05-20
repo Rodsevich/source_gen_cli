@@ -34,10 +34,10 @@ class FileGenerationModule extends GenerationModule<File> {
   /// But if source has only one extension, even `name.mustache`, the generated
   /// [File] will, by default, not be processed and named as the source
   FileGenerationModule.fromExistingFile(
-      File source, String relativePathDestination)
+      File source, String relativePathDestination,
+      {bool processInputWithMustache: true})
       : this(source.readAsStringSync(), relativePathDestination,
-            processInputWithMustache: (source.path.endsWith(".mustache") &&
-                source.path.split('.').length > 2));
+            processInputWithMustache: processInputWithMustache);
 
   FileGenerationModule.fromExistingDir(
       Directory dir, String generationName, String sourceString,

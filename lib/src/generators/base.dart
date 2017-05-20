@@ -79,7 +79,7 @@ abstract class Generator implements SynchronousInteractionsInterface {
   /// Syntactic-sugar for standard processing of a file. _Id est_ interacting
   /// with all its annotatons
   Future<FileProcessResult> processFile(String relativePath) {
-    FileProcessor fileProcessor = new FileProcessor(relativePath);
+    FileProcessorModule fileProcessor = new FileProcessorModule(relativePath);
     return addGenerationStep(fileProcessor);
   }
 
