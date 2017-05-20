@@ -69,7 +69,7 @@ class GeneratorModulesInitializer {
   }
 }
 
-class GenerationResult<T> {
+abstract class GenerationResult<T> {
   T object;
   GenerationResult(this.object);
 }

@@ -155,7 +155,7 @@ defineTests() {
       personsLogFile.deleteSync();
     });
     test('first person generation', () async {
-      PersonGenerator generator = new PersonGenerator();
+      PersonGenerator generator = new PersonGenerator(null);
       GenerationResults results = await generator.execute();
       expect(
           personsLogFile.readAsStringSync(), equals(expectedPersonGeneration));

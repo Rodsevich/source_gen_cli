@@ -26,7 +26,7 @@ defineTests() {
     Process.run("pub", ["get"]);
   });
   group('Generator Dependencies Installer', () {
-    DependencyGenerator depGenerator = new DependencyGenerator();
+    DependencyGenerator depGenerator = new DependencyGenerator(null);
     List<String> pkgNames =
         depGenerator.dependencies.map((Dependency dep) => dep.name).toList();
     test('Installs dependencies in pubspec.yaml', () async {
