@@ -24,13 +24,13 @@ abstract class InteractionsInterface {
   Future<String> askForSelection(String message, List<String> options);
 }
 
-/// The interface that should be implemented by [Generator] in order to provide
-/// an easy-to-use API in the programming of [Generator]s
-abstract class SynchronousInteractionsInterface {
-  bool askForConfirmation(String message, {bool defaultValue: true});
-  String askForInput(String message, String checkRegExp);
-  String askForSelection(String message, List<String> options);
-}
+// /// The interface that should be implemented by [Generator] in order to provide
+// /// an easy-to-use API in the programming of [Generator]s
+// abstract class SynchronousInteractionsInterface {
+//   bool askForConfirmation(String message, {bool defaultValue: true});
+//   String askForInput(String message, String checkRegExp);
+//   String askForSelection(String message, List<String> options);
+// }
 
 /// The entity in charge of instantiating and handling the [Interaction]s
 abstract class InteractionsHandler implements InteractionsInterface {

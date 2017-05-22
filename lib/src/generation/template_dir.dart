@@ -32,7 +32,7 @@ class TemplateGenerationModule
     }
   }
 
-  GenerationResult<List<GenerationResult>> execution() {
+  TemplateGenerationResults execution() {
     GeneratorModulesInitializer initializer = new GeneratorModulesInitializer(
         this.varsResolver, this.logger, this.override);
     List<DirGenerationResult> dirResults = [];
@@ -45,6 +45,10 @@ class TemplateGenerationModule
       initializer.initialize(fileGM);
       fileResults.add(fileGM.execution());
     }
+    List<GenerationResult> results = [];
+    results.addAll(dirResults);
+    results.addAll(fileResults);
+    return new TemplateGenerationResults(results);
   }
 
   @override
@@ -54,4 +58,14 @@ class TemplateGenerationModule
       .addAll(dirTemplateModules
           .map((GenerationModule module) => module.neededVariables)
           .reduce((List<String> l1, List<String> l2) => l1.addAll(l2)));
+}
+
+class TemplateGenerationResults
+    extends GenerationResult<List<GenerationResult>> {
+  TemplateGenerationResults(List<GenerationResult> object) : super(object);
+
+  List<GenerationResult> addResult(GenerationResult result) {
+    object.add(result);
+    return object;
+  }
 }

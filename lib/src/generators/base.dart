@@ -10,19 +10,20 @@ import 'package:logging/logging.dart';
 import 'package:source_gen_cli/src/generation/fileProcessor.dart';
 import 'package:source_gen_cli/src/generation/new_dir.dart';
 import 'package:source_gen_cli/src/generation/new_file.dart';
+import 'package:source_gen_cli/src/generation/template_dir.dart';
 
 /// The base class from where the generation will took place. This is the
 /// backbone of the generation and is the starting point from where new
 /// [Generator]s shall start.
-abstract class Generator implements SynchronousInteractionsInterface {
+abstract class Generator implements InteractionsInterface {
   DependenciesProcessor _depsProcessor = new DependenciesProcessor();
   GeneratorModulesInitializer _modulesInitializer;
   bool _predefinedDependenciesAdded = false;
   bool _generatorInitizalized = false;
   GenerationStepsSequencer _sequencer = new GenerationStepsSequencer();
+  InteractionsHandler interactionsHandler;
   VariablesResolver variablesResolver;
   Logger logger;
-  InteractionsHandler interactionsHandler;
 
   Generator(this.interactionsHandler) {
     variablesResolver = new VariablesResolver(this.startingVariables);
@@ -97,6 +98,13 @@ abstract class Generator implements SynchronousInteractionsInterface {
     addGenerationStep(dirGeneration);
   }
 
+  Future<TemplateGenerationResults> generateTemplateDir(
+      String sourceRelativePath, String relativePathDestination) {
+    TemplateGenerationModule templateGM = new TemplateGenerationModule(
+        sourceRelativePath, relativePathDestination);
+    addGenerationStep(templateGM);
+  }
+
   void _addPredefinedDeps() {
     if (_predefinedDependenciesAdded == false &&
         alwaysNeededDependencies.isNotEmpty) {
@@ -117,19 +125,17 @@ abstract class Generator implements SynchronousInteractionsInterface {
   }
 
   @override
-  bool askForConfirmation(String message, {bool defaultValue: true}) {
-    // TODO: implement askForConfirmation
-  }
+  Future<bool> askForConfirmation(String message, {bool defaultValue: true}) =>
+      interactionsHandler.askForConfirmation(message,
+          defaultValue: defaultValue);
 
   @override
-  String askForInput(String message, String checkRegExp) {
-    // TODO: implement askForInput
-  }
+  Future<String> askForInput(String message, String checkRegExp) =>
+      interactionsHandler.askForInput(message, checkRegExp);
 
   @override
-  String askForSelection(String message, List<String> options) {
-    // TODO: implement askForSelection
-  }
+  Future<String> askForSelection(String message, List<String> options) =>
+      interactionsHandler.askForSelection(message, options);
 }
 
 enum OverridingPolicy { NEVER, ASK, ALWAYS }
