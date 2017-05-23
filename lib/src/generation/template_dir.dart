@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import './base.dart';
 import '../common.dart';
@@ -20,14 +21,18 @@ class TemplateGenerationModule
       : super(templateRelativePath) {
     Directory sourceDir =
         new Directory(getPackageRootPath() + templateRelativePath);
-    for (FileSystemEntity entity in sourceDir.listSync()) {
-      if (entity is File)
+    for (FileSystemEntity entity in sourceDir.listSync(recursive: true)) {
+      String name = path.relative(entity.path, from: sourceDir.path);
+      String relativeDestination = generationRelativePath + name;
+      if (entity is File) {
         this.fileTemplateModules.add(new FileGenerationModule.fromExistingFile(
-            entity, generationRelativePath,
+            entity, relativeDestination,
             processInputWithMustache: (entity.path.endsWith(".mustache") &&
                 entity.path.split('.').length > 2)));
-      else if (entity is Directory) {
-        this.dirTemplateModules.add(new DirGenerationModule(entity.path));
+      } else if (entity is Directory) {
+        this
+            .dirTemplateModules
+            .add(new DirGenerationModule(relativeDestination));
       }
     }
   }
@@ -48,6 +53,7 @@ class TemplateGenerationModule
     List<GenerationResult> results = [];
     results.addAll(dirResults);
     results.addAll(fileResults);
+    // debugger();
     return new TemplateGenerationResults(results);
   }
 

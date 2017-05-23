@@ -27,7 +27,8 @@ class DirGenerationModule extends GenerationModule<Directory> {
   }
 
   DirGenerationModule.fromParentDir(Directory parentDirectory, String name,
-      {override: false, generateRecursively: false})
+      {OverridingPolicy override: OverridingPolicy.NEVER,
+      bool generateRecursively: false})
       : this("${parentDirectory.path}/$name",
             override: override, generateRecursively: generateRecursively);
   // {

@@ -18,7 +18,12 @@ class TemplateGenerator extends Generator {
 
   OverridingPolicy get overridePolicy => OverridingPolicy.ALWAYS;
 
-  Map get startingVariables => null;
+  Map get startingVariables => {
+        "num1": '1',
+        "num2": 2,
+        "dontRender": "TEST FAIL!",
+        "render": "testing successful"
+      };
 
   TemplateGenerator(InteractionsHandler interactionsHandler)
       : super(interactionsHandler) {
@@ -29,7 +34,7 @@ class TemplateGenerator extends Generator {
 defineTests() {
   setUpAll(() {
     Directory d = new Directory(getPackageRootPath() + "test/template_test/d");
-    d.create(recursive: true);
+    d.createSync(recursive: true);
     File f1 = new File(d.path + "/f{{num1}}.mustache.mustache");
     f1.writeAsString("{{dontRender}}");
     File f2 = new File(d.path + "/f{{num2}}.dart.mustache");
@@ -38,30 +43,48 @@ defineTests() {
   tearDownAll(() {
     Directory base = new Directory(getPackageRootPath() + "test/template_test");
     Directory generated =
-        new Directory(getPackageRootPath() + "test/template_generated");
-    base.delete(recursive: true);
+        new Directory(getPackageRootPath() + "test/template_generatedd");
+    Directory badGenerated =
+        new Directory(getPackageRootPath() + "test/template_generatedd");
     generated.delete(recursive: true);
+    badGenerated.delete(recursive: true);
+    base.delete(recursive: true);
   });
-  group('Template Generator', () {
+  group("TemplateDirGenerationModule", () {
     CLInterface clInterface;
     CLIInteractionsHandler cliIH;
     TemplateGenerator templateGenerator;
     Directory generated;
+    List<FileSystemEntity> generatedDirList;
     test('creation', () {
       clInterface = new CLInterface(stdin, stdout);
       cliIH = new CLIInteractionsHandler(clInterface);
       templateGenerator = new TemplateGenerator(cliIH);
       expect(templateGenerator, isNotNull);
     });
-    test("execution", () {
-      templateGenerator.execute();
+    test("execution", () async {
+      GenerationResults res = await templateGenerator.execute();
+      print(res.toString());
       generated =
           new Directory(getPackageRootPath() + "test/template_generated");
       expect(generated.existsSync(), isTrue);
     });
     test("dir generation", () {
-      List contents = generated.listSync();
-      expect(contents, contains("d"));
+      generatedDirList = generated.listSync();
+      expect(generatedDirList.singleWhere((e) => e is Directory).path,
+          endsWith("d"));
+    });
+    test("f1 created and not rendered", () {
+      File f1 = new File(generated.path + "/f1.mustache");
+      expect(f1.existsSync(), isTrue);
+      expect(f1.readAsStringSync(), contains("{{dontRender}}"));
+      expect(f1.readAsStringSync(), isNot(contains("TEST FAIL!")));
+    });
+    test("f2 created and rendered", () {
+      File f2 = new File(generated.path + "/f2.dart");
+      expect(f2.existsSync(), isTrue);
+      expect(f2.readAsStringSync(), isNot(contains("{{render}}")));
+      expect(f2.readAsStringSync(), isNot(contains("testing successful")));
     });
   });
 }
