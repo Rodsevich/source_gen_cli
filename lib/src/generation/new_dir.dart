@@ -6,8 +6,6 @@ import '../common.dart';
 import 'package:source_gen_cli/src/generators/base.dart';
 
 class DirGenerationModule extends GenerationModule<Directory> {
-  Directory directory;
-
   /// Wether to generate all the required [Directory]ies implicit in the
   /// `relativePath` from this constructor(s) when there are missing ones.
   /// i.e.:
@@ -22,9 +20,7 @@ class DirGenerationModule extends GenerationModule<Directory> {
 
   DirGenerationModule(String relativePath,
       {this.override: OverridingPolicy.NEVER, this.generateRecursively: false})
-      : super(relativePath, override) {
-    this.directory = new Directory(this.pathDestination);
-  }
+      : super(relativePath, override);
 
   DirGenerationModule.fromParentDir(Directory parentDirectory, String name,
       {OverridingPolicy override: OverridingPolicy.NEVER,
@@ -39,6 +35,8 @@ class DirGenerationModule extends GenerationModule<Directory> {
 
   DirGenerationResult execution() {
     bool overriden;
+    Directory directory = new Directory(
+        processMustache(this.pathDestination, varsResolver.getAll));
     if (directory.existsSync()) {
       logger.warning("${directory.path} already exists (override: $override)");
       if (override == OverridingPolicy.ALWAYS) {
@@ -50,12 +48,18 @@ class DirGenerationModule extends GenerationModule<Directory> {
       }
     } else {
       logger.fine(directory.path + " didn't exist. Creating it.");
-      directory.createSync(recursive: generateRecursively);
+      try {
+        directory.createSync(recursive: generateRecursively);
+      } catch (e) {
+        logger.severe(directory.path +
+            " couldn't be created (generateRecursively: $generateRecursively)");
+        rethrow;
+      }
     }
     return new DirGenerationResult(directory, overriden);
   }
 
-  List<String> get neededVariables => mustacheVars(directory.path);
+  List<String> get neededVariables => mustacheVars(this.pathDestination);
 }
 
 class DirGenerationResult extends GenerationResult<Directory> {

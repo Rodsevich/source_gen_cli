@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import './base.dart';
 import '../common.dart';
@@ -17,22 +16,29 @@ class TemplateGenerationModule
   List<DirGenerationModule> dirTemplateModules = [];
 
   TemplateGenerationModule(
-      String templateRelativePath, this.generationRelativePath)
-      : super(templateRelativePath) {
+      String templateRelativePath, this.generationRelativePath,
+      [OverridingPolicy overridingPolicy])
+      : super(templateRelativePath, overridingPolicy) {
     Directory sourceDir =
         new Directory(getPackageRootPath() + templateRelativePath);
     for (FileSystemEntity entity in sourceDir.listSync(recursive: true)) {
       String name = path.relative(entity.path, from: sourceDir.path);
-      String relativeDestination = generationRelativePath + name;
+      String relativeDestination = "$generationRelativePath/$name";
       if (entity is File) {
+        bool render = false;
+        if (name.endsWith(".mustache")) {
+          if (name.split('.').length > 2) {
+            render = true;
+            name = name.substring(0, name.length - 9);
+          }
+        }
+        relativeDestination = "$generationRelativePath/$name";
         this.fileTemplateModules.add(new FileGenerationModule.fromExistingFile(
             entity, relativeDestination,
-            processInputWithMustache: (entity.path.endsWith(".mustache") &&
-                entity.path.split('.').length > 2)));
+            processInputWithMustache: render));
       } else if (entity is Directory) {
-        this
-            .dirTemplateModules
-            .add(new DirGenerationModule(relativeDestination));
+        this.dirTemplateModules.add(new DirGenerationModule(relativeDestination,
+            generateRecursively: true));
       }
     }
   }

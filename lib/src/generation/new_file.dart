@@ -53,7 +53,8 @@ class FileGenerationModule extends GenerationModule<File> {
   List<String> get neededVariables => mustacheVars(sourceString);
   @override
   FileGenerationResult execution() {
-    File destinationFile = new File(this.pathDestination);
+    File destinationFile =
+        new File(processMustache(this.pathDestination, varsResolver.getAll));
     bool overriden = false;
     logger.finest(
         "destination File instance created: <File>(${destinationFile.path})");

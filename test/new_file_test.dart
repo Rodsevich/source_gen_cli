@@ -27,19 +27,13 @@ defineTests() {
       fgm = new FileGenerationModule.fromExistingFile(f1, "test/w.txt");
       expect(fgm.sourceString, equals("SORPI"));
     });
-    test(".fromExistingFile processes well the processMustache flag", () {
-      fgm1 = new FileGenerationModule.fromExistingFile(f1, "test/r.txt");
-      fgm2 = new FileGenerationModule.fromExistingFile(f2, "test/t.txt");
-      expect(fgm1.processInputWithMustache, isFalse);
-      expect(fgm2.processInputWithMustache, isTrue);
-    });
   });
   group("Execution:", () {
+    Logger logger = new Logger("test");
+    VariablesResolver resolver = new VariablesResolver();
+    GeneratorModulesInitializer initializer = new GeneratorModulesInitializer(
+        resolver, logger, OverridingPolicy.ALWAYS);
     test("Generates processed output where it should", () async {
-      Logger logger = new Logger("test");
-      VariablesResolver resolver = new VariablesResolver();
-      GeneratorModulesInitializer initializer = new GeneratorModulesInitializer(
-          resolver, logger, OverridingPolicy.ALWAYS);
       String src = "{{#iterate}}{{var}} # {{/iterate}}{{var2}}";
       String dest = "test/ejecucion.txt";
       List<Map> listMap = [
@@ -58,9 +52,25 @@ defineTests() {
       });
       expect(generated.existsSync(), isTrue);
       File comparator = new File(getPackageRootPath() + dest);
-      // print("Generated file path: " + generated.path);
-      // expect(comparator, equals(generated));
       expect(comparator.readAsStringSync(), equals("1 # 2 # 3 # 4"));
+    });
+    test("Don't processes mustache file contents when specified", () async {
+      String src = "{{dontProcessMe}}\n{{! don't erase me}}";
+      String dest = "test/ejecucion.txt";
+      resolver["dontProcessMe"] = "TEST FAIL";
+      FileGenerationModule fgm =
+          new FileGenerationModule(src, dest, processInputWithMustache: false);
+      initializer.initialize(fgm);
+      FileGenerationResult res = await fgm.execute();
+      File generated = res.object;
+      addTearDown(() {
+        generated.deleteSync();
+      });
+      expect(generated.existsSync(), isTrue);
+      File comparator = new File(getPackageRootPath() + dest);
+      expect(comparator.readAsStringSync(), isNot(contains("TEST FAIL")));
+      expect(comparator.readAsStringSync(), contains("{{dontProcessMe}}"));
+      expect(comparator.readAsStringSync(), contains("{{! don't erase me}}"));
     });
   });
 }

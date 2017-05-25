@@ -16,16 +16,18 @@ import 'package:source_gen_cli/src/generation/template_dir.dart';
 /// backbone of the generation and is the starting point from where new
 /// [Generator]s shall start.
 abstract class Generator implements InteractionsInterface {
-  DependenciesProcessor _depsProcessor = new DependenciesProcessor();
+  DependenciesProcessor _depsProcessor;
   GeneratorModulesInitializer _modulesInitializer;
   bool _predefinedDependenciesAdded = false;
   bool _generatorInitizalized = false;
-  GenerationStepsSequencer _sequencer = new GenerationStepsSequencer();
+  GenerationStepsSequencer _sequencer;
   InteractionsHandler interactionsHandler;
   VariablesResolver variablesResolver;
   Logger logger;
 
   Generator(this.interactionsHandler) {
+    _depsProcessor = new DependenciesProcessor();
+    _sequencer = new GenerationStepsSequencer();
     variablesResolver = new VariablesResolver(this.startingVariables);
     logger = new Logger("generator." + this.runtimeType.toString());
     _modulesInitializer = new GeneratorModulesInitializer(

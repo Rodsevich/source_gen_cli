@@ -8,7 +8,7 @@ class GenerationStepsSequencer {
   List<GenerationStep> _steps = [];
   int _currentIndex, _duringExecutionAddedIndex;
   bool _executionStarted = false;
-  Completer _completer = new Completer();
+  Completer _completer;
 
   GenerationStep get _current =>
       (_currentIndex < _steps.length) ? _steps[_currentIndex] : null;
@@ -25,9 +25,15 @@ class GenerationStepsSequencer {
   }
 
   Future execute() {
+    _completer = new Completer();
     _executionStarted = true;
     _currentIndex = 0;
-    _current.execute().then(_processCurrentExecutionResult);
+    if (_current == null)
+      new Future(() {
+        _completer.complete();
+      });
+    else
+      _current.execute().then(_processCurrentExecutionResult);
     return _completer.future;
   }
 

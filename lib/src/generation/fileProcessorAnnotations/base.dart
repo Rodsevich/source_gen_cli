@@ -1,6 +1,5 @@
 library file.generation.annotations;
 
-import 'dart:developer';
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:logging/logging.dart';

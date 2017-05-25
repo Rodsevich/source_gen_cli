@@ -1,4 +1,5 @@
 import '../example/source_gen_cli_example.dart';
+import 'dart:developer';
 import 'dart:io';
 import 'package:den_api/den_api.dart';
 import 'package:source_gen_cli/generator.dart';
@@ -21,11 +22,11 @@ defineTests() {
         pubspecLock.renameSync(pkgRootPath + "pubspec.lock.testbackup");
   });
   tearDownAll(() {
-    pubspecBackup.rename(pkgRootPath + "pubspec.yaml");
+    pubspecBackup.renameSync(pkgRootPath + "pubspec.yaml");
     pubspecLockBackup.renameSync(pkgRootPath + "pubspec.lock");
     Process.run("pub", ["get"]);
   });
-  group('Generator Dependencies Installer', () {
+  group('Generator Dependencies Installer:', () {
     DependencyGenerator depGenerator = new DependencyGenerator(null);
     List<String> pkgNames =
         depGenerator.dependencies.map((Dependency dep) => dep.name).toList();
